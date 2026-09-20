@@ -1,0 +1,26 @@
+[project]
+name = "image-converter-for-mp3-player"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "bambu2", email = "2672680268@qq.com" }
+]
+requires-python = ">=3.14"
+dependencies = [
+    "pillow>=12.3.0",
+    "pydantic-settings>=2.15.0",
+    "tqdm>=4.70.1",
+    "typer>=0.27.2",
+]
+
+[project.scripts]
+image-converter-for-mp3-player = "image_converter_for_mp3_player:main"
+
+[build-system]
+requires = ["uv_build>=0.12.8,<0.13.0"]
+build-backend = "uv_build"
+
+[[tool.uv.index]]
+url = "https://pypi.tuna.tsinghua.edu.cn/simple"
+default = true
