@@ -1,7 +1,10 @@
 import logging
 from pathlib import Path
+from typing import Annotated
 
 import typer
+from rich import print
+from rich.progress import track
 
 from image_converter_for_mp3_player.log import setup_logging
 
@@ -10,10 +13,24 @@ logger = logging.getLogger(__name__)
 
 logger.info("程序启动")
 
+app = typer.Typer()
 
-def main(input_dir: Path, output_dir: Path, rotatable_aspect_ratio: bool = True):
+
+@app.command()
+def pad(input_dir: Path, output_dir: Path, rotatable_aspect_ratio: bool = True):
+    """_summary_
+
+    Args:
+        input_dir (Path): _description_
+        output_dir (Path): _description_
+        rotatable_aspect_ratio (bool, optional): _description_. Defaults to True.
+    """
     print("Hello World")
 
 
+def crop(input_dir: Path, output_dir: Path, rotatable_aspect_ratio: bool = True):
+    pass
+
+
 if __name__ == "__main__":
-    typer.run(main)
+    app()
