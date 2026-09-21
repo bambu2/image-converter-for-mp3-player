@@ -17,18 +17,54 @@ app = typer.Typer()
 
 
 @app.command()
-def pad(input_dir: Path, output_dir: Path, rotatable_aspect_ratio: bool = True):
+def pad(
+    input_dir: Annotated[
+        Path,
+        typer.Argument(
+            exists=True,
+            readable=True,
+            resolve_path=True,
+        ),
+    ],
+    output_dir: Annotated[
+        Path,
+        typer.Argument(
+            exists=True,
+            writable=True,
+            resolve_path=True,
+        ),
+    ],
+    rotatable_aspect_ratio: Annotated[bool, typer.Option()] = True,
+):
     """_summary_
 
     Args:
-        input_dir (Path): _description_
-        output_dir (Path): _description_
-        rotatable_aspect_ratio (bool, optional): _description_. Defaults to True.
+        input_dir (Annotated[ Path, typer.Argument, optional): _description_. Defaults to True, readable=True, resolve_path=True, ), ].
+        output_dir (Annotated[ Path, typer.Argument, optional): _description_. Defaults to True, writable=True, resolve_path=True, ), ].
+        rotatable_aspect_ratio (Annotated[bool, typer.Option, optional): _description_. Defaults to True.
     """
     print("Hello World")
 
 
-def crop(input_dir: Path, output_dir: Path, rotatable_aspect_ratio: bool = True):
+def crop(
+    input_dir: Annotated[
+        Path,
+        typer.Argument(
+            exists=True,
+            readable=True,
+            resolve_path=True,
+        ),
+    ],
+    output_dir: Annotated[
+        Path,
+        typer.Argument(
+            exists=True,
+            writable=True,
+            resolve_path=True,
+        ),
+    ],
+    rotatable_aspect_ratio: Annotated[bool, typer.Option()] = True,
+):
     pass
 
 
