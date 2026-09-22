@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Annotated
 
 from pydantic import BaseModel, Field, PositiveInt
 from pydantic_settings import BaseSettings
@@ -15,6 +16,7 @@ class Settings(BaseSettings):
 
     rotatable_aspect_ratio: bool = True
     recursive: bool = True
+    dry_run: bool = False
 
     img_exts = {".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp"}
 
@@ -25,3 +27,4 @@ class PadSettings(BaseModel):
 
 class CropSettings(BaseSettings):
     crop_path: Path = Settings.output_path / "crop"
+    crop_relative_size: Annotated[float, Field(gt=0.0, le=1.0)] = 1.0
