@@ -3,7 +3,7 @@ from pathlib import Path
 from image_converter_for_mp3_player.config import Settings
 
 
-def walk_path(folder: Path, recursive: bool) -> list[Path]:
+def traverse_folder(folder: Path, recursive: bool) -> list[Path]:
     if recursive:
         return [p for p in folder.rglob("*") if p.suffix.lower() in Settings.img_exts]
     else:
