@@ -37,8 +37,7 @@ def pad(
     screen_resolution: Annotated[tuple[int, int], typer.Argument()],
     rotatable_aspect_ratio: Annotated[bool, typer.Option()],
 ):
-
-    print("Hello World")
+    pass
 
 
 @app.command()

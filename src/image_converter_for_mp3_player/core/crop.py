@@ -5,6 +5,7 @@ from pathlib import Path
 from PIL import Image
 
 from image_converter_for_mp3_player.config import Settings, CropSettings
+from image_converter_for_mp3_player.utils import get_orientation, Orientation
 
 
 def crop(image_path: Path):
@@ -12,8 +13,6 @@ def crop(image_path: Path):
 
 
 """
-from config import Config
-from pipelines import BaseImagePipeline
 from utils import Orientation, pad_to_size
 from utils import resize_like_thumbnail
 
