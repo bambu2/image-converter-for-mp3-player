@@ -11,8 +11,12 @@ class Settings(BaseSettings):
     input_path: Path = Path("input")
     output_path: Path = Path("output")
 
-    screen_resolution: tuple[PositiveInt, PositiveInt] = (240, 320)
-    screen_aspect_ratio: float = screen_resolution[0] / screen_resolution[1]
+    screen_resolution: str = "240x320"
+    width, height = map(int, screen_resolution.split("x"))
+    screen_aspect_ratio: float = width / height
+
+    landscape_resolution: tuple[PositiveInt, PositiveInt] = (width, height)
+    portrait_resolution: tuple[PositiveInt, PositiveInt] = (height, width)
 
     rotatable_aspect_ratio: bool = True
     recursive: bool = True
@@ -23,6 +27,8 @@ class Settings(BaseSettings):
 
 class PadSettings(BaseModel):
     pad_path: Path = Settings.output_path / "pad"
+
+    blur_radius: Annotated[float, Field(ge=0.0)] = 10.0
 
 
 class CropSettings(BaseSettings):
