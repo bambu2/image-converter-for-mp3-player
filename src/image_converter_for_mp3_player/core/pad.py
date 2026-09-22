@@ -1,26 +1,25 @@
-from pathlib import Path
-
 from PIL import Image, ImageFilter, ImageOps
 
 from image_converter_for_mp3_player.config import PadSettings, Settings
+from image_converter_for_mp3_player.utils import Orientation
 
 
-def apply_blurred_background(image: Image.Image) -> Image.Image:
-    w, h = image.size
+def apply_blurred_background(img: Image.Image, ori: Orientation) -> Image.Image:
+    if Settings.rotatable_aspect_ratio:
+        target_resolution = (
+            Settings.landscape_resolution
+            if ori == Orientation.LANDSCAPE
+            else Settings.portrait_resolution
+        )
+    else:
+        target_resolution = Settings.landscape_resolution
 
-    target_size = (
-        Settings.landscape_resolution
-        if w / h > Settings.screen_aspect_ratio
-        else Settings.portrait_resolution
-    )
-
-    bg = ImageOps.fit(image, target_size, method=Image.Resampling.LANCZOS)
+    bg = ImageOps.fit(img, target_resolution, method=Image.Resampling.LANCZOS)
     bg = bg.filter(ImageFilter.GaussianBlur(radius=PadSettings.blur_radius))
 
-    fg = image.copy()
-    fg.thumbnail(target_size, Image.Resampling.LANCZOS)
+    img.thumbnail(target_resolution, Image.Resampling.LANCZOS)
 
-    offset_x = (bg.width - fg.width) // 2
-    offset_y = (bg.height - fg.height) // 2
-    bg.paste(fg, (offset_x, offset_y))
+    offset = ((bg.width - img.width) // 2, (bg.height - img.height) // 2)
+
+    bg.paste(img, offset)
     return bg
