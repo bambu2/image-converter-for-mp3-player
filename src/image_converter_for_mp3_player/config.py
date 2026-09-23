@@ -12,6 +12,8 @@ class Settings(BaseSettings):
     output_path: Path = Path("output")
 
     screen_resolution: str = "320x240"
+    screen_width: int
+    screen_height: int
     screen_width, screen_height = map(int, screen_resolution.split("x"))
     screen_aspect_ratio: float = screen_width / screen_height
 
@@ -24,7 +26,7 @@ class Settings(BaseSettings):
     recursive: bool = True
     dry_run: bool = False
 
-    img_exts = {".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp"}
+    img_exts: frozenset = frozenset({".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp"})
 
 
 class PadSettings(BaseModel):
