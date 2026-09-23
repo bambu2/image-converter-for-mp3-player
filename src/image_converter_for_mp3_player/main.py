@@ -4,7 +4,7 @@ from typing import Annotated
 
 import typer
 
-from image_converter_for_mp3_player.config import CropSettings, PadSettings, Settings
+from image_converter_for_mp3_player.config import crop_settings, pad_settings, settings
 from image_converter_for_mp3_player.core import (
     apply_blurred_background,
     apply_pipeline,
@@ -27,7 +27,7 @@ def pad(
             readable=True,
             resolve_path=True,
         ),
-    ] = Settings.input_path,
+    ] = settings.input_dir,
     output_dir: Annotated[
         Path,
         typer.Argument(
@@ -35,11 +35,11 @@ def pad(
             writable=True,
             resolve_path=True,
         ),
-    ] = Settings.output_path,
-    screen_resolution: Annotated[str, typer.Argument()] = Settings.screen_resolution,
+    ] = pad_settings.output_dir,
+    screen_resolution: Annotated[str, typer.Argument()] = settings.screen_resolution,
     rotatable_aspect_ratio: Annotated[
         bool, typer.Option(help="allow to rotate the aspect ratio")
-    ] = PadSettings.rotatable_aspect_ratio,
+    ] = pad_settings.rotatable_aspect_ratio,
 ):
     apply_pipeline(input_dir, output_dir, apply_blurred_background)
 
@@ -53,7 +53,7 @@ def crop(
             readable=True,
             resolve_path=True,
         ),
-    ] = Settings.input_path,
+    ] = settings.input_dir,
     output_path: Annotated[
         Path,
         typer.Argument(
@@ -61,11 +61,11 @@ def crop(
             writable=True,
             resolve_path=True,
         ),
-    ] = Settings.output_path,
-    screen_resolution: Annotated[str, typer.Argument()] = Settings.screen_resolution,
+    ] = crop_settings.output_dir,
+    screen_resolution: Annotated[str, typer.Argument()] = settings.screen_resolution,
     rotatable_aspect_ratio: Annotated[
         bool, typer.Option(help="allow to rotate the aspect ratio")
-    ] = CropSettings.rotatable_aspect_ratio,
+    ] = crop_settings.rotatable_aspect_ratio,
 ):
     apply_pipeline(input_path, output_path, crop_into_images)
 

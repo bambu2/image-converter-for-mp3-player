@@ -17,7 +17,7 @@ def apply_pipeline(input_dir: Path, output_dir: Path, fn: Callable):
 
         for image_path in track(image_paths, description="Processing images"):
             try:
-                apply_image_pipeline(image_path, fn)
+                apply_image_pipeline(image_path, fn, output_dir)
             except (IsADirectoryError, FileNotFoundError, PermissionError) as e:
                 logger.error(f"Error processing: {e}")
                 raise typer.Exit(1)

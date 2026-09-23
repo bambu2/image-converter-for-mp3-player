@@ -2,7 +2,7 @@ from enum import Enum, auto
 
 from PIL import Image
 
-from image_converter_for_mp3_player.config import Settings
+from image_converter_for_mp3_player.config import settings
 
 
 class Orientation(Enum):
@@ -23,6 +23,6 @@ def get_orientation(image: Image.Image) -> Orientation:
     aspect_ratio = image.width / image.height
     return (
         Orientation.LANDSCAPE
-        if aspect_ratio > Settings.screen_aspect_ratio
+        if aspect_ratio > settings.screen_aspect_ratio
         else Orientation.PORTRAIT
     )

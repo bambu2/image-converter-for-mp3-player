@@ -1,6 +1,6 @@
 from PIL import Image
 
-from image_converter_for_mp3_player.config import CropSettings, Settings
+from image_converter_for_mp3_player.config import crop_settings, settings
 from image_converter_for_mp3_player.utils import Orientation, get_orientation
 
 
@@ -18,31 +18,31 @@ def crop_into_images(img: Image.Image) -> list[Image.Image]:
 
 
 def _get_crop_relative_size(image_aspect_ratio: float) -> float:
-    if CropSettings.long_img_max_crop_size and (
+    if crop_settings.long_img_max_crop_size and (
         image_aspect_ratio
-        > Settings.screen_aspect_ratio * CropSettings.long_img_threshold
+        > settings.screen_aspect_ratio * crop_settings.long_img_threshold
         or image_aspect_ratio
-        < Settings.screen_aspect_ratio / CropSettings.long_img_threshold
+        < settings.screen_aspect_ratio / crop_settings.long_img_threshold
     ):
         crop_relative_size = 1.0
     else:
-        crop_relative_size = CropSettings.crop_relative_size
+        crop_relative_size = crop_settings.crop_relative_size
     return crop_relative_size
 
 
 def _get_crop_size(
     img_width: int, img_height: int, ori: Orientation, crop_relative_size: float
 ) -> tuple[int, int]:
-    if CropSettings.rotatable_aspect_ratio:
+    if crop_settings.rotatable_aspect_ratio:
         if ori == Orientation.LANDSCAPE:
             crop_width = int(img_width * crop_relative_size)
-            crop_height = int(crop_width / Settings.screen_aspect_ratio)
+            crop_height = int(crop_width / settings.screen_aspect_ratio)
         else:
             crop_height = int(img_height * crop_relative_size)
-            crop_width = int(crop_height / Settings.screen_aspect_ratio)
+            crop_width = int(crop_height / settings.screen_aspect_ratio)
     else:
         crop_width = int(img_width * crop_relative_size)
-        crop_height = int(crop_width / Settings.screen_aspect_ratio)
+        crop_height = int(crop_width / settings.screen_aspect_ratio)
     return (crop_width, crop_height)
 
 
