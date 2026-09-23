@@ -5,7 +5,7 @@ from image_converter_for_mp3_player.utils import Orientation
 
 
 def apply_blurred_background(img: Image.Image, ori: Orientation) -> Image.Image:
-    if Settings.rotatable_aspect_ratio:
+    if PadSettings.rotatable_aspect_ratio:
         target_resolution = (
             Settings.landscape_resolution
             if ori == Orientation.LANDSCAPE

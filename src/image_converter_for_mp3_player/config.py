@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Annotated
 
-from pydantic import BaseModel, Field, PositiveInt, PositiveFloat
+from pydantic import BaseModel, Field, PositiveFloat, PositiveInt
 from pydantic_settings import BaseSettings
 
 
@@ -12,11 +12,14 @@ class Settings(BaseSettings):
     output_path: Path = Path("output")
 
     screen_resolution: str = "320x240"
-    width, height = map(int, screen_resolution.split("x"))
-    screen_aspect_ratio: float = width / height
+    screen_width, screen_height = map(int, screen_resolution.split("x"))
+    screen_aspect_ratio: float = screen_width / screen_height
 
-    landscape_resolution: tuple[PositiveInt, PositiveInt] = (width, height)
-    portrait_resolution: tuple[PositiveInt, PositiveInt] = (height, width)
+    landscape_resolution: tuple[PositiveInt, PositiveInt] = (
+        screen_width,
+        screen_height,
+    )
+    portrait_resolution: tuple[PositiveInt, PositiveInt] = (screen_height, screen_width)
 
     recursive: bool = True
     dry_run: bool = False
