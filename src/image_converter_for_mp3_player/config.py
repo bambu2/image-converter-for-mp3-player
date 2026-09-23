@@ -29,7 +29,7 @@ class Settings(BaseSettings):
 
 class PadSettings(BaseModel):
     pad_path: Path = Settings.output_path / "pad"
-
+    pipeline = []
     rotatable_aspect_ratio: bool = True
     blur_radius: Annotated[float, Field(ge=0.0)] = 10.0
 
