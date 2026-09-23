@@ -3,9 +3,8 @@ from pathlib import Path
 from typing import Annotated
 
 import typer
-from rich import print
-from rich.progress import track
 
+from image_converter_for_mp3_player.config import CropSettings, PadSettings, Settings
 from image_converter_for_mp3_player.log import setup_logging
 
 setup_logging()
@@ -25,7 +24,7 @@ def pad(
             readable=True,
             resolve_path=True,
         ),
-    ],
+    ] = Settings.input_path,
     output_path: Annotated[
         Path,
         typer.Argument(
@@ -33,9 +32,11 @@ def pad(
             writable=True,
             resolve_path=True,
         ),
-    ],
-    screen_resolution: Annotated[tuple[int, int], typer.Argument()],
-    rotatable_aspect_ratio: Annotated[bool, typer.Option()],
+    ] = Settings.output_path,
+    screen_resolution: Annotated[str, typer.Argument()] = Settings.screen_resolution,
+    rotatable_aspect_ratio: Annotated[
+        bool, typer.Option()
+    ] = PadSettings.rotatable_aspect_ratio,
 ):
     pass
 
@@ -49,7 +50,7 @@ def crop(
             readable=True,
             resolve_path=True,
         ),
-    ],
+    ] = Settings.input_path,
     output_path: Annotated[
         Path,
         typer.Argument(
@@ -57,9 +58,11 @@ def crop(
             writable=True,
             resolve_path=True,
         ),
-    ],
-    screen_resolution: Annotated[tuple[int, int], typer.Argument()],
-    rotatable_aspect_ratio: Annotated[bool, typer.Option()],
+    ] = Settings.output_path,
+    screen_resolution: Annotated[str, typer.Argument()] = Settings.screen_resolution,
+    rotatable_aspect_ratio: Annotated[
+        bool, typer.Option()
+    ] = CropSettings.rotatable_aspect_ratio,
 ):
     pass
 

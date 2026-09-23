@@ -3,6 +3,7 @@ from collections.abc import Callable
 from pathlib import Path
 
 from PIL import Image
+from rich.progress import track
 
 from image_converter_for_mp3_player.config import Settings
 
@@ -45,7 +46,7 @@ def save_as_jpg(img: Image.Image, output_path: Path) -> bool:
 
 def apply_pipeline(input_path: Path, output_path: Path, fn: Callable):
     image_paths = traverse_folder(input_path)
-    for image_path in image_paths:
+    for image_path in track(image_paths, description="Processing images"):
         with load_image_rgb(image_path) as img:
             img = process(fn, img)
             thumbnail_to_screen(img)
