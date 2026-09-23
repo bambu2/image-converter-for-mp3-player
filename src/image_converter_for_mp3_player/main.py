@@ -31,11 +31,11 @@ def pad(
     output_dir: Annotated[
         Path,
         typer.Argument(
-            exists=True,
+            exists=False,
             writable=True,
             resolve_path=True,
         ),
-    ] = pad_settings.output_dir,
+    ] = pad_settings.pad_dir,
     screen_resolution: Annotated[str, typer.Argument()] = settings.screen_resolution,
     rotatable_aspect_ratio: Annotated[
         bool, typer.Option(help="allow to rotate the aspect ratio")
@@ -57,11 +57,11 @@ def crop(
     output_path: Annotated[
         Path,
         typer.Argument(
-            exists=True,
+            exists=False,
             writable=True,
             resolve_path=True,
         ),
-    ] = crop_settings.output_dir,
+    ] = crop_settings.crop_dir,
     screen_resolution: Annotated[str, typer.Argument()] = settings.screen_resolution,
     rotatable_aspect_ratio: Annotated[
         bool, typer.Option(help="allow to rotate the aspect ratio")

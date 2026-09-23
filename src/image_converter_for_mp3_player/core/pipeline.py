@@ -13,7 +13,6 @@ logger = logging.getLogger(__name__)
 def apply_pipeline(input_dir: Path, output_dir: Path, fn: Callable):
     try:
         image_paths = get_image_paths(input_dir)
-        output_dir.mkdir(parents=True, exist_ok=True)
 
         for image_path in track(image_paths, description="Processing images"):
             try:

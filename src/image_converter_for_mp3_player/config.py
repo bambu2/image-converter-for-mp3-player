@@ -1,12 +1,19 @@
 from pathlib import Path
 from typing import Annotated
 
-from pydantic import BaseModel, Field, PositiveFloat, PositiveInt, model_validator
+from pydantic import (
+    BaseModel,
+    DirectoryPath,
+    Field,
+    PositiveFloat,
+    PositiveInt,
+    field_validator,
+)
 from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
-    input_dir: Path = Path("input")
+    input_dir: DirectoryPath = Path("input")
 
     screen_resolution: str = "320x240"
     screen_width: int = Field(
@@ -32,27 +39,21 @@ class Settings(BaseSettings):
 
 
 class PadSettings(BaseModel):
-    output_dir: Path = Path("output")
-    pad_path: Path | None = None
+    pad_dir: DirectoryPath = Path("output") / "pad"
 
     rotatable_aspect_ratio: bool = True
     blur_radius: Annotated[float, Field(ge=0.0)] = 10.0
 
-    @model_validator(mode="after")
-    def _fill_pad_path(self):
-        if self.pad_path is None:
-            self.pad_path = self.output_dir / "pad"
-        return self
-
-    @property
-    def pad(self) -> Path:
-        assert self.pad_path is not None
-        return self.pad_path
+    @field_validator("pad_dir", mode="before")
+    @classmethod
+    def ensure_dir_exists(cls, v):
+        path = Path(v)
+        path.mkdir(parents=True, exist_ok=True)
+        return path
 
 
-class CropSettings(BaseSettings):
-    output_dir: Path = Path("output")
-    crop_path: Path | None = None
+class CropSettings(BaseModel):
+    crop_dir: DirectoryPath = Path("output") / "crop"
 
     rotatable_aspect_ratio: bool = True
 
@@ -60,16 +61,12 @@ class CropSettings(BaseSettings):
     long_img_max_crop_size: bool = True
     long_img_threshold: PositiveFloat = 2.0
 
-    @model_validator(mode="after")
-    def _fill_crop_path(self):
-        if self.crop_path is None:
-            self.crop_path = self.output_dir / "crop"
-        return self
-
-    @property
-    def crop(self) -> Path:
-        assert self.crop_path is not None
-        return self.crop_path
+    @field_validator("crop_dir", mode="before")
+    @classmethod
+    def ensure_dir_exists(cls, v):
+        path = Path(v)
+        path.mkdir(parents=True, exist_ok=True)
+        return path
 
 
 settings = Settings()
