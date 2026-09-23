@@ -8,63 +8,40 @@ from image_converter_for_mp3_player.config import Settings, CropSettings
 from image_converter_for_mp3_player.utils import get_orientation, Orientation
 
 
-def crop(image_path: Path):
+def crop(img: Image.Image) -> list[Image.Image]:
     screen_width, screen_height = Settings.screen_resolution
+    img_width, img_height = img.size
+    image_aspect_ratio = img_width / img_height
+
+    if CropSettings.long_img_max_crop_size and (
+        image_aspect_ratio
+        > Settings.screen_aspect_ratio * CropSettings.long_img_threshold
+        or image_aspect_ratio
+        < Settings.screen_aspect_ratio / CropSettings.long_img_threshold
+    ):
+        crop_relative_size = 1.0
+    else:
+        crop_relative_size = CropSettings.crop_relative_size
+
+    if CropSettings.rotatable_aspect_ratio:
+        if get_orientation(img) == Orientation.LANDSCAPE:
+            crop_width = int(img_width * crop_relative_size)
+            crop_height = int(crop_width / Settings.screen_aspect_ratio)
+        else:
+            crop_height = int(img_height * crop_relative_size)
+            crop_width = int(crop_height / Settings.screen_aspect_ratio)
+    else:
+        crop_width = int(img_width * crop_relative_size)
+        crop_height = int(crop_width / Settings.screen_aspect_ratio)
 
 
 """
-from utils import Orientation, pad_to_size
-from utils import resize_like_thumbnail
-
-
-class SlidingDirection(Enum):
-    HORIZONTAL = "horizontal"
-    VERTICAL = "vertical"
-
-
-    def process(self, image_path: Path, **kwargs) -> list[Image.Image]:
-        window_scale = kwargs.get("window_scale", 0.5)
-        auto_max_threshold = kwargs.get("auto_max_threshold", 2.0)  # 0 表示不启用
-
-        image = self.load_image(image_path)
-
-        direction = self._determine_sliding_direction(image)
-
-        iw = image.width
-        ih = image.height
-
-        image_aspect = iw / ih
-
-        cw = Config.screen_width
-        ch = Config.screen_height
-
-        screen_aspect = Config.screen_aspect
-
-        # 自动调整 window_scale（如果启用）
-        if auto_max_threshold > 0:
-            if (
-                image_aspect > screen_aspect * auto_max_threshold
-                or image_aspect < screen_aspect / auto_max_threshold
-            ):
-                window_scale = 1.0
-
-        if direction == SlidingDirection.HORIZONTAL:
-            win_h = int(iw * window_scale)
-            win_w = int(win_h * screen_aspect)
-        else:
-            win_w = int(iw * window_scale)
-            win_h = int(win_w / screen_aspect)
-
-        # 确保窗口不超界
-        win_w = min(win_w, iw)
-        win_h = min(win_h, ih)
-
         selected_windows = self._grid_windows(
             img_w=iw,
             img_h=ih,
             win_w=win_w,
             win_h=win_h,
-            screen_aspect=screen_aspect,
+            Settings.screen_aspect_ratio=Settings.screen_aspect_ratio,
             direction=direction,
         )
         crops = []
@@ -77,32 +54,24 @@ class SlidingDirection(Enum):
             crops.append(padded)
         return crops
 
-    def _determine_sliding_direction(self, image: Image.Image) -> SlidingDirection:
-        orientation = self.classify_orientation(image)
-        return (
-            SlidingDirection.VERTICAL
-            if orientation == Orientation.PORTRAIT
-            else SlidingDirection.HORIZONTAL
-        )
-
     def _grid_windows(
         self,
         img_w: int,
         img_h: int,
         win_w: int,
         win_h: int,
-        screen_aspect: float,
+        Settings.screen_aspect_ratio: float,
         direction: SlidingDirection,
     ) -> list[tuple[int, int, int, int]]:
         if direction == SlidingDirection.VERTICAL:
             cols = math.ceil(img_w / win_w)
             win_w = math.ceil(img_w / cols)
-            win_h = math.ceil(win_w / screen_aspect)
+            win_h = math.ceil(win_w / Settings.screen_aspect_ratio)
             rows = math.ceil(img_h / win_h)
         else:
             rows = math.ceil(img_h / win_h)
             win_h = math.ceil(img_h / rows)
-            win_w = math.ceil(win_h * screen_aspect)
+            win_w = math.ceil(win_h * Settings.screen_aspect_ratio)
             cols = math.ceil(img_w / win_w)
 
         y_starts = np.linspace(0, img_h - win_h, num=rows, dtype=int)

@@ -22,12 +22,7 @@ def load_image_rgb(image_path: Path) -> Image.Image:
         return img
 
 
-def save_as_jpg(
-    image: Image.Image,
-    output_path: Path,
-    quality: int = 100,
-    optimize: bool = True,
-) -> bool:
+def save_as_jpg(image: Image.Image, output_path: Path) -> bool:
     try:
         image.save(output_path, "JPEG", quality=100)
         return True
