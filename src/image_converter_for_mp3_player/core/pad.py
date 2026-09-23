@@ -1,10 +1,11 @@
 from PIL import Image, ImageFilter, ImageOps
 
 from image_converter_for_mp3_player.config import pad_settings, settings
-from image_converter_for_mp3_player.utils import Orientation
+from image_converter_for_mp3_player.utils import Orientation, get_orientation
 
 
-def apply_blurred_background(img: Image.Image, ori: Orientation) -> Image.Image:
+def apply_blurred_background(img: Image.Image) -> Image.Image:
+    ori = get_orientation(img)
     if pad_settings.rotatable_aspect_ratio:
         target_resolution = (
             settings.landscape_resolution

@@ -41,12 +41,13 @@ def pad(
         bool, typer.Option(help="allow to rotate the aspect ratio")
     ] = pad_settings.rotatable_aspect_ratio,
 ):
+    output_dir.mkdir(parents=True, exist_ok=True)
     apply_pipeline(input_dir, output_dir, apply_blurred_background)
 
 
 @app.command()
 def crop(
-    input_path: Annotated[
+    input_dir: Annotated[
         Path,
         typer.Argument(
             exists=True,
@@ -54,7 +55,7 @@ def crop(
             resolve_path=True,
         ),
     ] = settings.input_dir,
-    output_path: Annotated[
+    output_dir: Annotated[
         Path,
         typer.Argument(
             exists=False,
@@ -67,7 +68,8 @@ def crop(
         bool, typer.Option(help="allow to rotate the aspect ratio")
     ] = crop_settings.rotatable_aspect_ratio,
 ):
-    apply_pipeline(input_path, output_path, crop_into_images)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    apply_pipeline(input_dir, output_dir, crop_into_images)
 
 
 if __name__ == "__main__":
