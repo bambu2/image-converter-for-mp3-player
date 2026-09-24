@@ -10,22 +10,17 @@ logger = logging.getLogger(__name__)
 def apply_image_pipeline(
     image_path: Path, fn: Callable, output_dir: Path, stem: str, settings
 ):
-    img = _load_image_rgb(image_path)
-    with img:
-        img = _process(fn, img)
-        _thumbnail_to_screen(img, settings=settings)
-        _save_as_jpg(img, output_dir, stem)
-
-
-def _load_image_rgb(image_path: Path) -> Image.Image:
     with Image.open(image_path) as img:
-        if img.mode != "RGB":
-            img = img.convert("RGB")
-        return img
+        img = _convert_rgb(img)
+        for i, result in enumerate(fn(img, settings)):
+            _thumbnail_to_screen(result, settings=settings)
+            _save_as_jpg(result, output_dir, f"{stem}_{i}")
 
 
-def _process(fn: Callable, img: Image.Image) -> Image.Image:
-    return fn(img)
+def _convert_rgb(img: Image.Image) -> Image.Image:
+    if img.mode != "RGB":
+        img = img.convert("RGB")
+    return img
 
 
 def _thumbnail_to_screen(img: Image.Image, settings) -> None:
@@ -40,6 +35,3 @@ def _save_as_jpg(img: Image.Image, output_dir: Path, stem: str) -> None:
             img.save(output_dir / f"{stem}.jpg", "JPEG", quality=100)
     except OSError as e:
         logger.error(f"Error processing: {e}")
-
-
-# FIXME: img.save for a real file name

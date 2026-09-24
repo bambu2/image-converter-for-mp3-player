@@ -46,7 +46,3 @@ class CropSettings(Settings):
     crop_relative_size: Annotated[float, Field(gt=0.0, le=1.0)] = 0.5
     long_img_max_crop_size: bool = True
     long_img_threshold: PositiveFloat = 2.0
-
-
-pad_settings = PadSettings()
-crop_settings = CropSettings()

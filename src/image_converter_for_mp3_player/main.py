@@ -1,123 +1,84 @@
 import logging
-from collections.abc import Callable
 from pathlib import Path
 from typing import Annotated
 
 import typer
 
-from image_converter_for_mp3_player.config import crop_settings, pad_settings
+from image_converter_for_mp3_player.config import CropSettings, PadSettings
 from image_converter_for_mp3_player.core import (
     apply_blurred_background,
-    apply_pipeline,
     crop_into_images,
+    process,
 )
-from image_converter_for_mp3_player.utils import get_image_paths, update_settings
 
 logger = logging.getLogger(__name__)
 
 logger.info("程序启动")
 
+pad_settings = PadSettings()
+crop_settings = CropSettings()
+
+
 app = typer.Typer()
 
 
-InputDir = Annotated[
-    Path | None,
-    typer.Argument(
-        exists=True,
-        readable=True,
-        resolve_path=True,
-    ),
-]
-OutputDir = Annotated[
-    Path | None,
-    typer.Argument(
-        exists=False,
-        writable=True,
-        resolve_path=True,
-    ),
-]
-Resolution = Annotated[str | None, typer.Argument()]
+InputDir = Annotated[Path, typer.Option("--input-dir", "-i", help="input directory")]
+OutputDir = Annotated[Path, typer.Option("--output-dir", "-o", help="output directory")]
+ScreenResolution = Annotated[str, typer.Option(help="screen resolution")]
 
 Recursive = Annotated[
-    bool | None, typer.Option(help="whether to process subdirectories")
+    bool, typer.Option("--recursive", "-r", help="whether to process subdirectories")
 ]
 DryRun = Annotated[
-    bool | None, typer.Option(help="whether to actually write the output files")
+    bool, typer.Option(help="whether to actually write the output files")
 ]
 RotatableAspectRatio = Annotated[
-    bool | None, typer.Option(help="allow to rotate the aspect ratio")
+    bool, typer.Option(help="allow to rotate the aspect ratio")
 ]
 
 
 @app.command()
 def pad(
-    input_dir: InputDir,
-    output_dir: OutputDir,
-    screen_resolution: Resolution,
-    recursive: Recursive,
-    dry_run: DryRun,
-    rotatable_aspect_ratio: RotatableAspectRatio,
+    input_dir: InputDir = pad_settings.input_dir,
+    output_dir: OutputDir = pad_settings.output_dir,
+    screen_resolution: ScreenResolution = pad_settings.screen_resolution,
+    recursive: Recursive = pad_settings.recursive,
+    dry_run: DryRun = pad_settings.dry_run,
+    rotatable_aspect_ratio: RotatableAspectRatio = pad_settings.rotatable_aspect_ratio,
 ):
-    args_updates = {
-        "input_dir": input_dir,
-        "output_dir": output_dir,
-        "screen_resolution": screen_resolution,
-    }
-    opts_updates = {
-        "recursive": recursive,
-        "dry_run": dry_run,
-        "rotatable_aspect_ratio": rotatable_aspect_ratio,
-    }
-    pad_updates = {}
-
-    for update in (args_updates, opts_updates, pad_updates):
-        update_settings(update, pad_settings)
-
-    process(apply_blurred_background, pad_settings)
+    settings = pad_settings.model_copy(
+        update={
+            "input_dir": input_dir,
+            "output_dir": output_dir,
+            "screen_resolution": screen_resolution,
+            "recursive": recursive,
+            "dry_run": dry_run,
+            "rotatable_aspect_ratio": rotatable_aspect_ratio,
+        }
+    )
+    process(apply_blurred_background, settings)
 
 
 @app.command()
 def crop(
-    input_dir: InputDir,
-    output_dir: OutputDir,
-    screen_resolution: Resolution,
-    recursive: Recursive,
-    dry_run: DryRun,
-    rotatable_aspect_ratio: RotatableAspectRatio,
+    input_dir: InputDir = crop_settings.input_dir,
+    output_dir: OutputDir = crop_settings.output_dir,
+    screen_resolution: ScreenResolution = crop_settings.screen_resolution,
+    recursive: Recursive = crop_settings.recursive,
+    dry_run: DryRun = crop_settings.dry_run,
+    rotatable_aspect_ratio: RotatableAspectRatio = crop_settings.rotatable_aspect_ratio,
 ):
-    args_updates = {
-        "input_dir": input_dir,
-        "output_dir": output_dir,
-        "screen_resolution": screen_resolution,
-    }
-    opts_updates = {
-        "recursive": recursive,
-        "dry_run": dry_run,
-        "rotatable_aspect_ratio": rotatable_aspect_ratio,
-    }
-    crop_updates = {}
-
-    for update in (args_updates, opts_updates, crop_updates):
-        update_settings(update, crop_updates)
-
-    process(crop_into_images, crop_settings)
-
-
-def process(fn: Callable, settings):
-    try:
-        image_paths = get_image_paths(settings.input_dir, settings)
-    except (NotADirectoryError, FileNotFoundError, PermissionError) as e:
-        logger.error(f"Error processing: {e}")
-        raise typer.Exit(1)
-
-    if settings.dry_run:
-        print(f"[DRY RUN] input_dir: {settings.input_dir}")
-        for image_path in image_paths:
-            print(f"[DRY RUN] image_path: {image_path}")
-        print(f"[DRY RUN] output_dir: {settings.output_dir}")
-    else:
-        settings.output_dir.mkdir(parents=True, exist_ok=True)
-        apply_pipeline(fn, image_paths, settings)
+    settings = crop_settings.model_copy(
+        update={
+            "input_dir": input_dir,
+            "output_dir": output_dir,
+            "screen_resolution": screen_resolution,
+            "recursive": recursive,
+            "dry_run": dry_run,
+            "rotatable_aspect_ratio": rotatable_aspect_ratio,
+        }
+    )
+    process(crop_into_images, settings)
 
 
 if __name__ == "__main__":
