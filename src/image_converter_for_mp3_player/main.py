@@ -21,55 +21,76 @@ app = typer.Typer()
 @app.command()
 def pad(
     input_dir: Annotated[
-        Path,
+        Path | None,
         typer.Argument(
             exists=True,
             readable=True,
             resolve_path=True,
         ),
-    ] = settings.input_dir,
+    ] = None,
     output_dir: Annotated[
-        Path,
+        Path | None,
         typer.Argument(
             exists=False,
             writable=True,
             resolve_path=True,
         ),
-    ] = pad_settings.pad_dir,
-    screen_resolution: Annotated[str, typer.Argument()] = settings.screen_resolution,
+    ] = None,
+    screen_resolution: Annotated[str | None, typer.Argument()] = None,
     rotatable_aspect_ratio: Annotated[
-        bool, typer.Option(help="allow to rotate the aspect ratio")
-    ] = pad_settings.rotatable_aspect_ratio,
+        bool | None, typer.Option(help="allow to rotate the aspect ratio")
+    ] = None,
 ):
-    output_dir.mkdir(parents=True, exist_ok=True)
-    apply_pipeline(input_dir, output_dir, apply_blurred_background)
+    updates = {
+        "input_dir": input_dir,
+        "output_dir": output_dir,
+        "screen_resolution": screen_resolution,
+        "rotatable_aspect_ratio": rotatable_aspect_ratio,
+    }
+    for key, value in updates.items():
+        if value is not None:
+            setattr(settings, key, value)
+
+    pad_settings.output_dir.mkdir(parents=True, exist_ok=True)
+    apply_pipeline(
+        pad_settings.input_dir, apply_blurred_background, pad_settings.output_dir
+    )
 
 
 @app.command()
 def crop(
     input_dir: Annotated[
-        Path,
+        Path | None,
         typer.Argument(
             exists=True,
             readable=True,
             resolve_path=True,
         ),
-    ] = settings.input_dir,
+    ] = None,
     output_dir: Annotated[
-        Path,
+        Path | None,
         typer.Argument(
             exists=False,
             writable=True,
             resolve_path=True,
         ),
-    ] = crop_settings.crop_dir,
-    screen_resolution: Annotated[str, typer.Argument()] = settings.screen_resolution,
+    ] = None,
+    screen_resolution: Annotated[str | None, typer.Argument()] = None,
     rotatable_aspect_ratio: Annotated[
-        bool, typer.Option(help="allow to rotate the aspect ratio")
-    ] = crop_settings.rotatable_aspect_ratio,
+        bool | None, typer.Option(help="allow to rotate the aspect ratio")
+    ] = None,
 ):
-    output_dir.mkdir(parents=True, exist_ok=True)
-    apply_pipeline(input_dir, output_dir, crop_into_images)
+    updates = {
+        "input_dir": input_dir,
+        "output_dir": output_dir,
+        "screen_resolution": screen_resolution,
+        "rotatable_aspect_ratio": rotatable_aspect_ratio,
+    }
+    for key, value in updates.items():
+        if value is not None:
+            setattr(settings, key, value)
+    crop_settings.output_dir.mkdir(parents=True, exist_ok=True)
+    apply_pipeline(crop_settings.input_dir, crop_into_images, crop_settings.output_dir)
 
 
 if __name__ == "__main__":

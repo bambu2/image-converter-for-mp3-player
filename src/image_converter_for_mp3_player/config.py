@@ -13,8 +13,6 @@ from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
-    input_dir: DirectoryPath = Path("input")
-
     screen_resolution: str = "320x240"
     screen_width: int = Field(
         default_factory=lambda d: int(d["screen_resolution"].split("x")[0])
@@ -39,12 +37,13 @@ class Settings(BaseSettings):
 
 
 class PadSettings(BaseModel):
-    pad_dir: DirectoryPath = Path("output") / "pad"
+    input_dir: DirectoryPath = Path("input")
+    output_dir: DirectoryPath = Path("output") / "pad"
 
     rotatable_aspect_ratio: bool = True
     blur_radius: Annotated[float, Field(ge=0.0)] = 10.0
 
-    @field_validator("pad_dir", mode="before")
+    @field_validator("output_dir", mode="before")
     @classmethod
     def ensure_dir_exists(cls, v):
         path = Path(v)
@@ -53,7 +52,8 @@ class PadSettings(BaseModel):
 
 
 class CropSettings(BaseModel):
-    crop_dir: DirectoryPath = Path("output") / "crop"
+    input_dir: DirectoryPath = Path("input")
+    output_dir: DirectoryPath = Path("output") / "crop"
 
     rotatable_aspect_ratio: bool = True
 
@@ -61,7 +61,7 @@ class CropSettings(BaseModel):
     long_img_max_crop_size: bool = True
     long_img_threshold: PositiveFloat = 2.0
 
-    @field_validator("crop_dir", mode="before")
+    @field_validator("output_dir", mode="before")
     @classmethod
     def ensure_dir_exists(cls, v):
         path = Path(v)
