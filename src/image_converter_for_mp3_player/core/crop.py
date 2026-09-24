@@ -62,46 +62,27 @@ def _get_crop_size(
     return (crop_width, crop_height)
 
 
+def _axis_starts(img_size: int, crop_size: int, devision: int) -> list[int]:
+    if crop_size <= 0 or devision <= 0:
+        raise ValueError(f"crop_size={crop_size}, devision={devision} 必须为正")
+    if devision == 1 or crop_size >= img_size:
+        return [0]
+    step = (img_size - crop_size) // (devision - 1)
+    return [min(i * step, img_size - crop_size) for i in range(devision)]
+
+
 def _get_crop_boxes(
     img_width, img_height, crop_width, crop_height
 ) -> list[tuple[int, int, int, int]]:
+    if img_width <= 0 or img_height <= 0:
+        raise ValueError(f"图像尺寸必须为正: {img_width}x{img_height}")
+    if crop_width <= 0 or crop_height <= 0:
+        raise ValueError(f"裁剪尺寸必须为正: {crop_width}x{crop_height}")
+
     col = -(-img_width // crop_width)
-
-    if col < 1:
-        raise ValueError("col must be greater than 0")
-    elif col == 1:
-        x_step = crop_width
-    else:
-        dw = crop_width * col - img_width
-        if dw < 0:
-            raise ValueError("dw must be greater than or equal to 0")
-        elif dw == 0:
-            x_step = crop_width
-        else:
-            x_step = dw // (col - 1)
-
     row = -(-img_height // crop_height)
 
-    if row < 1:
-        raise ValueError("row must be greater than 0")
-    elif row == 1:
-        y_step = crop_height
-    else:
-        dh = crop_height * row - img_height
-        if dh < 0:
-            raise ValueError("dh must be greater than or equal to 0")
-        elif dh == 0:
-            y_step = crop_height
-        else:
-            y_step = dh // (row - 1)
+    xs = _axis_starts(img_width, crop_width, col)
+    ys = _axis_starts(img_height, crop_height, row)
 
-    if x_step < 1:
-        raise ValueError("x_step must be greater than 0")
-    if y_step < 1:
-        raise ValueError("y_step must be greater than 0")
-
-    return [
-        (x, y, x + crop_width, y + crop_height)
-        for x in range(0, img_width, x_step)
-        for y in range(0, img_height, y_step)
-    ]
+    return [(x, y, x + crop_width, y + crop_height) for x in xs for y in ys]
