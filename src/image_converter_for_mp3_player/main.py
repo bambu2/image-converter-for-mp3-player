@@ -1,4 +1,6 @@
 import logging
+from collections.abc import Callable
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Annotated
 
@@ -10,6 +12,7 @@ from image_converter_for_mp3_player.core import (
     apply_pipeline,
     crop_into_images,
 )
+from image_converter_for_mp3_player.utils import get_image_paths, update_settings
 
 logger = logging.getLogger(__name__)
 
@@ -18,8 +21,8 @@ logger.info("程序启动")
 app = typer.Typer()
 
 
-@app.command()
-def pad(
+@dataclass
+class CommonArgs:
     input_dir: Annotated[
         Path | None,
         typer.Argument(
@@ -27,7 +30,7 @@ def pad(
             readable=True,
             resolve_path=True,
         ),
-    ] = None,
+    ] = None
     output_dir: Annotated[
         Path | None,
         typer.Argument(
@@ -35,62 +38,89 @@ def pad(
             writable=True,
             resolve_path=True,
         ),
-    ] = None,
-    screen_resolution: Annotated[str | None, typer.Argument()] = None,
+    ] = None
+    screen_resolution: Annotated[str | None, typer.Argument()] = None
+
+
+@dataclass
+class CommonOpts:
+    recursive: Annotated[
+        bool | None, typer.Option(help="whether to process subdirectories")
+    ] = None
+    dry_run: Annotated[
+        bool | None, typer.Option(help="whether to actually write the output files")
+    ] = None
+
+
+@app.command()
+def pad(
+    args: CommonArgs,
+    opts: CommonOpts,
     rotatable_aspect_ratio: Annotated[
         bool | None, typer.Option(help="allow to rotate the aspect ratio")
     ] = None,
 ):
-    updates = {
-        "input_dir": input_dir,
-        "output_dir": output_dir,
-        "screen_resolution": screen_resolution,
-        "rotatable_aspect_ratio": rotatable_aspect_ratio,
+    args_updates = {
+        "input_dir": args.input_dir,
+        "output_dir": args.output_dir,
+        "screen_resolution": args.screen_resolution,
     }
-    for key, value in updates.items():
-        if value is not None:
-            setattr(settings, key, value)
+    opts_updates = {
+        "recursive": opts.recursive,
+        "dry_run": opts.dry_run,
+    }
+    pad_updates = {"rotatable_aspect_ratio": rotatable_aspect_ratio}
 
-    pad_settings.output_dir.mkdir(parents=True, exist_ok=True)
-    apply_pipeline(
-        pad_settings.input_dir, apply_blurred_background, pad_settings.output_dir
-    )
+    update_settings(args_updates, settings)
+    update_settings(opts_updates, settings)
+
+    update_settings(pad_updates, pad_settings)
+
+    process(apply_blurred_background, settings, pad_settings)
 
 
 @app.command()
 def crop(
-    input_dir: Annotated[
-        Path | None,
-        typer.Argument(
-            exists=True,
-            readable=True,
-            resolve_path=True,
-        ),
-    ] = None,
-    output_dir: Annotated[
-        Path | None,
-        typer.Argument(
-            exists=False,
-            writable=True,
-            resolve_path=True,
-        ),
-    ] = None,
-    screen_resolution: Annotated[str | None, typer.Argument()] = None,
+    args: CommonArgs,
+    opts: CommonOpts,
     rotatable_aspect_ratio: Annotated[
         bool | None, typer.Option(help="allow to rotate the aspect ratio")
     ] = None,
 ):
-    updates = {
-        "input_dir": input_dir,
-        "output_dir": output_dir,
-        "screen_resolution": screen_resolution,
-        "rotatable_aspect_ratio": rotatable_aspect_ratio,
+    args_updates = {
+        "input_dir": args.input_dir,
+        "output_dir": args.output_dir,
+        "screen_resolution": args.screen_resolution,
     }
-    for key, value in updates.items():
-        if value is not None:
-            setattr(settings, key, value)
-    crop_settings.output_dir.mkdir(parents=True, exist_ok=True)
-    apply_pipeline(crop_settings.input_dir, crop_into_images, crop_settings.output_dir)
+    opts_updates = {
+        "recursive": opts.recursive,
+        "dry_run": opts.dry_run,
+    }
+    crop_updates = {"rotatable_aspect_ratio": rotatable_aspect_ratio}
+
+    update_settings(args_updates, settings)
+    update_settings(opts_updates, settings)
+
+    update_settings(crop_updates, crop_settings)
+
+    process(crop_into_images, settings, crop_settings)
+
+
+def process(fn: Callable, settings, sub_settings):
+    try:
+        image_paths = get_image_paths(sub_settings.input_dir)
+    except (NotADirectoryError, FileNotFoundError, PermissionError) as e:
+        logger.error(f"Error processing: {e}")
+        raise typer.Exit(1)
+
+    if settings.dry_run:
+        print(f"[DRY RUN] input_dir: {sub_settings.input_dir}")
+        for image_path in image_paths:
+            print(f"[DRY RUN] image_path: {image_path}")
+        print(f"[DRY RUN] output_dir: {sub_settings.output_dir}")
+    else:
+        sub_settings.output_dir.mkdir(parents=True, exist_ok=True)
+        apply_pipeline(fn, image_paths, sub_settings)
 
 
 if __name__ == "__main__":

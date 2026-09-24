@@ -4,16 +4,16 @@ from pathlib import Path
 
 from PIL import Image
 
-from image_converter_for_mp3_player.config import settings
-
 logger = logging.getLogger(__name__)
 
 
-def apply_image_pipeline(image_path: Path, fn: Callable, output_dir: Path, stem: str):
+def apply_image_pipeline(
+    image_path: Path, fn: Callable, output_dir: Path, stem: str, settings
+):
     img = _load_image_rgb(image_path)
     with img:
         img = _process(fn, img)
-        _thumbnail_to_screen(img)
+        _thumbnail_to_screen(img, settings=settings)
         _save_as_jpg(img, output_dir, stem)
 
 
@@ -28,7 +28,7 @@ def _process(fn: Callable, img: Image.Image) -> Image.Image:
     return fn(img)
 
 
-def _thumbnail_to_screen(img: Image.Image) -> None:
+def _thumbnail_to_screen(img: Image.Image, settings) -> None:
     with img:
         img.copy()
         img.thumbnail((settings.screen_width, settings.screen_height))
