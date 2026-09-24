@@ -6,7 +6,7 @@ from typing import Annotated
 
 import typer
 
-from image_converter_for_mp3_player.config import crop_settings, pad_settings, settings
+from image_converter_for_mp3_player.config import crop_settings, pad_settings
 from image_converter_for_mp3_player.core import (
     apply_blurred_background,
     apply_pipeline,
@@ -71,12 +71,10 @@ def pad(
     }
     pad_updates = {"rotatable_aspect_ratio": rotatable_aspect_ratio}
 
-    update_settings(args_updates, settings)
-    update_settings(opts_updates, settings)
+    for updates in (args_updates, opts_updates, pad_updates):
+        update_settings(updates, pad_settings)
 
-    update_settings(pad_updates, pad_settings)
-
-    process(apply_blurred_background, settings, pad_settings)
+    process(apply_blurred_background, pad_settings)
 
 
 @app.command()
@@ -98,29 +96,27 @@ def crop(
     }
     crop_updates = {"rotatable_aspect_ratio": rotatable_aspect_ratio}
 
-    update_settings(args_updates, settings)
-    update_settings(opts_updates, settings)
+    for updates in (args_updates, opts_updates, crop_updates):
+        update_settings(updates, crop_updates)
 
-    update_settings(crop_updates, crop_settings)
-
-    process(crop_into_images, settings, crop_settings)
+    process(crop_into_images, crop_settings)
 
 
-def process(fn: Callable, settings, sub_settings):
+def process(fn: Callable, settings):
     try:
-        image_paths = get_image_paths(sub_settings.input_dir)
+        image_paths = get_image_paths(settings.input_dir, settings)
     except (NotADirectoryError, FileNotFoundError, PermissionError) as e:
         logger.error(f"Error processing: {e}")
         raise typer.Exit(1)
 
     if settings.dry_run:
-        print(f"[DRY RUN] input_dir: {sub_settings.input_dir}")
+        print(f"[DRY RUN] input_dir: {settings.input_dir}")
         for image_path in image_paths:
             print(f"[DRY RUN] image_path: {image_path}")
-        print(f"[DRY RUN] output_dir: {sub_settings.output_dir}")
+        print(f"[DRY RUN] output_dir: {settings.output_dir}")
     else:
-        sub_settings.output_dir.mkdir(parents=True, exist_ok=True)
-        apply_pipeline(fn, image_paths, sub_settings)
+        settings.output_dir.mkdir(parents=True, exist_ok=True)
+        apply_pipeline(fn, image_paths, settings)
 
 
 if __name__ == "__main__":
