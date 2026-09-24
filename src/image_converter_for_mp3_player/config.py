@@ -43,6 +43,6 @@ class PadSettings(Settings):
 class CropSettings(Settings):
     output_dir: Path = Path("output") / "crop"
 
-    crop_relative_size: Annotated[float, Field(gt=0.0, le=1.0)] = 0.5
+    crop_relative_size: PositiveFloat = 0.5
     long_img_max_crop_size: bool = True
     long_img_threshold: PositiveFloat = 2.0
