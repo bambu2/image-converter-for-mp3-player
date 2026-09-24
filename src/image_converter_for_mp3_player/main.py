@@ -1,6 +1,5 @@
 import logging
 from collections.abc import Callable
-from dataclasses import dataclass
 from pathlib import Path
 from typing import Annotated
 
@@ -21,54 +20,53 @@ logger.info("程序启动")
 app = typer.Typer()
 
 
-@dataclass
-class CommonArgs:
-    input_dir: Annotated[
-        Path | None,
-        typer.Argument(
-            exists=True,
-            readable=True,
-            resolve_path=True,
-        ),
-    ] = None
-    output_dir: Annotated[
-        Path | None,
-        typer.Argument(
-            exists=False,
-            writable=True,
-            resolve_path=True,
-        ),
-    ] = None
-    screen_resolution: Annotated[str | None, typer.Argument()] = None
+InputDir = Annotated[
+    Path | None,
+    typer.Argument(
+        exists=True,
+        readable=True,
+        resolve_path=True,
+    ),
+]
+OutputDir = Annotated[
+    Path | None,
+    typer.Argument(
+        exists=False,
+        writable=True,
+        resolve_path=True,
+    ),
+]
+Resolution = Annotated[str | None, typer.Argument()]
 
-
-@dataclass
-class CommonOpts:
-    recursive: Annotated[
-        bool | None, typer.Option(help="whether to process subdirectories")
-    ] = None
-    dry_run: Annotated[
-        bool | None, typer.Option(help="whether to actually write the output files")
-    ] = None
-    rotatable_aspect_ratio: Annotated[
-        bool | None, typer.Option(help="allow to rotate the aspect ratio")
-    ] = None
+Recursive = Annotated[
+    bool | None, typer.Option(help="whether to process subdirectories")
+]
+DryRun = Annotated[
+    bool | None, typer.Option(help="whether to actually write the output files")
+]
+RotatableAspectRatio = Annotated[
+    bool | None, typer.Option(help="allow to rotate the aspect ratio")
+]
 
 
 @app.command()
 def pad(
-    args: CommonArgs,
-    opts: CommonOpts,
+    input_dir: InputDir,
+    output_dir: OutputDir,
+    screen_resolution: Resolution,
+    recursive: Recursive,
+    dry_run: DryRun,
+    rotatable_aspect_ratio: RotatableAspectRatio,
 ):
     args_updates = {
-        "input_dir": args.input_dir,
-        "output_dir": args.output_dir,
-        "screen_resolution": args.screen_resolution,
+        "input_dir": input_dir,
+        "output_dir": output_dir,
+        "screen_resolution": screen_resolution,
     }
     opts_updates = {
-        "recursive": opts.recursive,
-        "dry_run": opts.dry_run,
-        "rotatable_aspect_ratio": opts.rotatable_aspect_ratio,
+        "recursive": recursive,
+        "dry_run": dry_run,
+        "rotatable_aspect_ratio": rotatable_aspect_ratio,
     }
     pad_updates = {}
 
@@ -80,18 +78,22 @@ def pad(
 
 @app.command()
 def crop(
-    args: CommonArgs,
-    opts: CommonOpts,
+    input_dir: InputDir,
+    output_dir: OutputDir,
+    screen_resolution: Resolution,
+    recursive: Recursive,
+    dry_run: DryRun,
+    rotatable_aspect_ratio: RotatableAspectRatio,
 ):
     args_updates = {
-        "input_dir": args.input_dir,
-        "output_dir": args.output_dir,
-        "screen_resolution": args.screen_resolution,
+        "input_dir": input_dir,
+        "output_dir": output_dir,
+        "screen_resolution": screen_resolution,
     }
     opts_updates = {
-        "recursive": opts.recursive,
-        "dry_run": opts.dry_run,
-        "rotatable_aspect_ratio": opts.rotatable_aspect_ratio,
+        "recursive": recursive,
+        "dry_run": dry_run,
+        "rotatable_aspect_ratio": rotatable_aspect_ratio,
     }
     crop_updates = {}
 
