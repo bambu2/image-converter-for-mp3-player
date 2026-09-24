@@ -50,15 +50,15 @@ class CommonOpts:
     dry_run: Annotated[
         bool | None, typer.Option(help="whether to actually write the output files")
     ] = None
+    rotatable_aspect_ratio: Annotated[
+        bool | None, typer.Option(help="allow to rotate the aspect ratio")
+    ] = None
 
 
 @app.command()
 def pad(
     args: CommonArgs,
     opts: CommonOpts,
-    rotatable_aspect_ratio: Annotated[
-        bool | None, typer.Option(help="allow to rotate the aspect ratio")
-    ] = None,
 ):
     args_updates = {
         "input_dir": args.input_dir,
@@ -68,11 +68,12 @@ def pad(
     opts_updates = {
         "recursive": opts.recursive,
         "dry_run": opts.dry_run,
+        "rotatable_aspect_ratio": opts.rotatable_aspect_ratio,
     }
-    pad_updates = {"rotatable_aspect_ratio": rotatable_aspect_ratio}
+    pad_updates = {}
 
-    for updates in (args_updates, opts_updates, pad_updates):
-        update_settings(updates, pad_settings)
+    for update in (args_updates, opts_updates, pad_updates):
+        update_settings(update, pad_settings)
 
     process(apply_blurred_background, pad_settings)
 
@@ -81,9 +82,6 @@ def pad(
 def crop(
     args: CommonArgs,
     opts: CommonOpts,
-    rotatable_aspect_ratio: Annotated[
-        bool | None, typer.Option(help="allow to rotate the aspect ratio")
-    ] = None,
 ):
     args_updates = {
         "input_dir": args.input_dir,
@@ -93,11 +91,12 @@ def crop(
     opts_updates = {
         "recursive": opts.recursive,
         "dry_run": opts.dry_run,
+        "rotatable_aspect_ratio": opts.rotatable_aspect_ratio,
     }
-    crop_updates = {"rotatable_aspect_ratio": rotatable_aspect_ratio}
+    crop_updates = {}
 
-    for updates in (args_updates, opts_updates, crop_updates):
-        update_settings(updates, crop_updates)
+    for update in (args_updates, opts_updates, crop_updates):
+        update_settings(update, crop_updates)
 
     process(crop_into_images, crop_settings)
 
