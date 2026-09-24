@@ -1,7 +1,5 @@
 from enum import Enum, auto
 
-from PIL import Image
-
 
 class Orientation(Enum):
     """图像方向（相对于目标宽高比）。
@@ -17,8 +15,8 @@ class Orientation(Enum):
     PORTRAIT = auto()
 
 
-def get_orientation(image: Image.Image, settings) -> Orientation:
-    aspect_ratio = image.width / image.height
+def get_orientation(img_size: tuple[int, int], settings) -> Orientation:
+    aspect_ratio = img_size[0] / img_size[1]
     return (
         Orientation.LANDSCAPE
         if aspect_ratio > settings.screen_aspect_ratio

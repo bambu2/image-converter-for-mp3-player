@@ -3,32 +3,29 @@ from collections.abc import Iterable
 from PIL import Image
 
 from image_converter_for_mp3_player.config import CropSettings
-from image_converter_for_mp3_player.utils import Orientation, get_orientation
+from image_converter_for_mp3_player.utils import (
+    Orientation,
+    get_orientation,
+    is_long_image,
+)
 
 
 def crop_into_images(img: Image.Image, settings: CropSettings) -> Iterable[Image.Image]:
-    img_width, img_height = img.size
-    image_aspect_ratio = img_width / img_height
+    img_size = img.size
 
-    ori = get_orientation(img, settings)
-    crop_relative_size = _get_crop_relative_size(image_aspect_ratio, settings)
-    crop_width, crop_height = _get_crop_size(
-        img_width, img_height, ori, crop_relative_size, settings
-    )
-    crop_boxes = _get_crop_boxes(img_width, img_height, crop_width, crop_height)
+    ori = get_orientation(img.size, settings)
+    crop_relative_size = _get_crop_relative_size(img_size, settings)
+    crop_size = _get_crop_size(img_size, ori, crop_relative_size, settings)
+    crop_boxes = _get_crop_boxes(img_size, crop_size)
     for box in crop_boxes:
         yield img.crop(box)
 
 
-def _get_crop_relative_size(image_aspect_ratio: float, settings: CropSettings) -> float:
-    if settings.long_img_max_crop_size and (
-        image_aspect_ratio > settings.screen_aspect_ratio * settings.long_img_threshold
-        or image_aspect_ratio
-        < settings.screen_aspect_ratio / settings.long_img_threshold
-    ):
-        crop_relative_size = 1.0
-    else:
-        crop_relative_size = settings.crop_relative_size
+def _get_crop_relative_size(img_size: tuple[int, int], settings: CropSettings) -> float:
+    crop_relative_size = settings.default_crop_relative_size
+
+    if settings.long_img_max_crop and is_long_image(img_size, settings):
+        crop_relative_size = settings.long_img_crop_relative_size
 
     if crop_relative_size < 0:
         raise ValueError("crop_relative_size must be greater than 0")
@@ -37,22 +34,26 @@ def _get_crop_relative_size(image_aspect_ratio: float, settings: CropSettings) -
 
 
 def _get_crop_size(
-    img_width: int,
-    img_height: int,
+    img_size: tuple[int, int],
     ori: Orientation,
     crop_relative_size: float,
     settings: CropSettings,
 ) -> tuple[int, int]:
+    img_width, img_height = img_size
     if settings.rotatable_aspect_ratio:
         if ori == Orientation.LANDSCAPE:
+            crop_height = int(img_height * crop_relative_size)
+            crop_width = int(crop_height * settings.screen_aspect_ratio)
+        else:
+            crop_width = int(img_width * crop_relative_size)
+            crop_height = int(crop_width / settings.rotated_screen_aspect_ratio)
+    else:
+        if ori == Orientation.LANDSCAPE:
+            crop_height = int(img_height * crop_relative_size)
+            crop_width = int(crop_height * settings.screen_aspect_ratio)
+        else:
             crop_width = int(img_width * crop_relative_size)
             crop_height = int(crop_width / settings.screen_aspect_ratio)
-        else:
-            crop_height = int(img_height * crop_relative_size)
-            crop_width = int(crop_height / settings.screen_aspect_ratio)
-    else:
-        crop_width = int(img_width * crop_relative_size)
-        crop_height = int(crop_width / settings.screen_aspect_ratio)
 
     if crop_width < 1:
         raise ValueError("crop_width must be greater than 0")
@@ -72,8 +73,11 @@ def _axis_starts(img_size: int, crop_size: int, devision: int) -> list[int]:
 
 
 def _get_crop_boxes(
-    img_width, img_height, crop_width, crop_height
+    img_size: tuple[int, int], crop_size: tuple[int, int]
 ) -> list[tuple[int, int, int, int]]:
+    img_width, img_height = img_size
+    crop_width, crop_height = crop_size
+
     if img_width <= 0 or img_height <= 0:
         raise ValueError(f"图像尺寸必须为正: {img_width}x{img_height}")
     if crop_width <= 0 or crop_height <= 0:

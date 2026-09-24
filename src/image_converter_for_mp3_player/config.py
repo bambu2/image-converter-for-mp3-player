@@ -14,6 +14,7 @@ class Settings(BaseSettings):
     screen_width: int = 0
     screen_height: int = 0
     screen_aspect_ratio: float = 0.0
+    rotated_screen_aspect_ratio: float = 0.0
     landscape_resolution: tuple[PositiveInt, PositiveInt] = (1, 1)
     portrait_resolution: tuple[PositiveInt, PositiveInt] = (1, 1)
 
@@ -28,7 +29,8 @@ class Settings(BaseSettings):
         w_str, h_str = self.screen_resolution.lower().split("x")
         self.screen_width = int(w_str)
         self.screen_height = int(h_str)
-        self.screen_aspect_ratio = self.screen_width / self.screen_height
+        screen_aspect_ratio = self.screen_width / self.screen_height
+        rotated_screen_aspect_ratio = self.screen_height / self.screen_width
         self.landscape_resolution = (self.screen_width, self.screen_height)
         self.portrait_resolution = (self.screen_height, self.screen_width)
         return self
@@ -43,6 +45,7 @@ class PadSettings(Settings):
 class CropSettings(Settings):
     output_dir: Path = Path("output") / "crop"
 
-    crop_relative_size: PositiveFloat = 0.5
-    long_img_max_crop_size: bool = True
+    default_crop_relative_size: PositiveFloat = 0.5
+    long_img_max_crop: bool = True
     long_img_threshold: PositiveFloat = 2.0
+    long_img_crop_relative_size: PositiveFloat = 1.0

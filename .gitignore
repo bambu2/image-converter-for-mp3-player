@@ -13,4 +13,3 @@ wheels/
 input/
 output/
 *.log
-tests/
