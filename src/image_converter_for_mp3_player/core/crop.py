@@ -15,7 +15,7 @@ def crop_into_images(img: Image.Image, settings: CropSettings) -> Iterable[Image
     crop_width, crop_height = _get_crop_size(
         img_width, img_height, ori, crop_relative_size, settings
     )
-    crop_boxes = _get_crop_boxes(img_width, img_height, crop_width, crop_height, ori)
+    crop_boxes = _get_crop_boxes(img_width, img_height, crop_width, crop_height)
     for box in crop_boxes:
         yield img.crop(box)
 
@@ -29,6 +29,10 @@ def _get_crop_relative_size(image_aspect_ratio: float, settings: CropSettings) -
         crop_relative_size = 1.0
     else:
         crop_relative_size = settings.crop_relative_size
+
+    if crop_relative_size < 0:
+        raise ValueError("crop_relative_size must be greater than 0")
+
     return crop_relative_size
 
 
@@ -49,16 +53,53 @@ def _get_crop_size(
     else:
         crop_width = int(img_width * crop_relative_size)
         crop_height = int(crop_width / settings.screen_aspect_ratio)
+
+    if crop_width < 1:
+        raise ValueError("crop_width must be greater than 0")
+    if crop_height < 1:
+        raise ValueError("crop_height must be greater than 0")
+
     return (crop_width, crop_height)
 
 
 def _get_crop_boxes(
-    img_width, img_height, crop_width, crop_height, ori
+    img_width, img_height, crop_width, crop_height
 ) -> list[tuple[int, int, int, int]]:
     col = -(-img_width // crop_width)
+
+    if col < 1:
+        raise ValueError("col must be greater than 0")
+    elif col == 1:
+        x_step = crop_width
+    else:
+        dw = crop_width * col - img_width
+        if dw < 0:
+            raise ValueError("dw must be greater than or equal to 0")
+        elif dw == 0:
+            x_step = crop_width
+        else:
+            x_step = dw // (col - 1)
+
     row = -(-img_height // crop_height)
-    x_step = (crop_width * col - img_width) // col
-    y_step = (crop_height * row - img_height) // row
+
+    if row < 1:
+        raise ValueError("row must be greater than 0")
+    elif row == 1:
+        y_step = crop_height
+    else:
+        dh = crop_height * row - img_height
+        if dh < 0:
+            raise ValueError("dh must be greater than or equal to 0")
+        elif dh == 0:
+            y_step = crop_height
+        else:
+            y_step = dh // (row - 1)
+
+    if x_step < 1:
+        raise ValueError("x_step must be greater than 0")
+    if y_step < 1:
+        raise ValueError("y_step must be greater than 0")
+
     return [
         (x, y, x + crop_width, y + crop_height)
         for x in range(0, img_width, x_step)
