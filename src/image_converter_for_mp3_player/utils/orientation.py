@@ -21,7 +21,7 @@ def get_orientation(
         return Orientation.LANDSCAPE
     elif img_aspect_ratio < screen_aspect_ratio:
         if img_aspect_ratio < screen_aspect_ratio / threshold:
-            return Orientation.PANORAMA
+            return Orientation.LONG_IMAGE
         return Orientation.PORTRAIT
     else:
         return Orientation.SIMILAR_ASPECT_RATIO

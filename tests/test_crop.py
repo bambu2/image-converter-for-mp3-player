@@ -1,7 +1,7 @@
 import pytest
 
-from image_converter_for_mp3_player.config import CropSettings
-from image_converter_for_mp3_player.core.grid_crop import (
+from image_converter_for_mp3_player.config import OverlapGridCropSettings
+from image_converter_for_mp3_player.core.overlap_grid_crop import (
     _get_crop_relative_size,
     _get_crop_size,
 )
@@ -9,12 +9,12 @@ from image_converter_for_mp3_player.core.grid_crop import (
 
 @pytest.fixture
 def crop_settings():
-    return CropSettings(
+    return OverlapGridCropSettings(
         screen_resolution_str="300x200",
-        crop_scale_factor=0.5,
+        scale_factor=0.5,
         long_img_max_crop=True,
         long_img_threshold=2.0,
-        rotatable_aspect_ratio=True,
+        rotatable_screen=True,
     )
 
 

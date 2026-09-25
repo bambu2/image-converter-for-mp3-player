@@ -6,14 +6,23 @@ import typer
 from PIL import Image
 from rich.progress import track
 
-from image_converter_for_mp3_player.config import CropSettings, BlurSettings
-from image_converter_for_mp3_player.utils import apply_image_pipeline, get_image_paths
+from image_converter_for_mp3_player.config import (
+    BlurSettings,
+    EquidistantCropSettings,
+    OverlapGridCropSettings,
+)
+from image_converter_for_mp3_player.utils import (
+    Orientation,
+    apply_image_pipeline,
+    get_image_paths,
+)
 
 logger = logging.getLogger(__name__)
 
 
-def process[S: BlurSettings | CropSettings](
-    fn: Callable[[Image.Image, S], Iterable[Image.Image]], settings: S
+def process[S: BlurSettings | OverlapGridCropSettings | EquidistantCropSettings](
+    fn: Callable[[Image.Image, Orientation, S], Iterable[Image.Image]],
+    settings: S,
 ) -> None:
     try:
         image_paths = get_image_paths(settings.input_dir, settings)
@@ -31,15 +40,15 @@ def process[S: BlurSettings | CropSettings](
         apply_pipeline(fn, image_paths, settings)
 
 
-def apply_pipeline[S: BlurSettings | CropSettings](
-    fn: Callable[[Image.Image, S], Iterable[Image.Image]],
+def apply_pipeline[S: BlurSettings | OverlapGridCropSettings | EquidistantCropSettings](
+    func: Callable[[Image.Image, Orientation, S], Iterable[Image.Image]],
     image_paths: list[Path],
     settings: S,
 ) -> None:
     for image_path in track(image_paths, description="Processing images"):
         try:
             apply_image_pipeline(
-                image_path, fn, settings.output_dir, image_path.stem, settings
+                image_path, func, settings.output_dir, image_path.stem, settings
             )
         except (IsADirectoryError, FileNotFoundError, PermissionError) as e:
             logger.error(f"Error processing: {e}")

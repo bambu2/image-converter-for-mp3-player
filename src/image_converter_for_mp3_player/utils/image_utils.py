@@ -4,15 +4,23 @@ from pathlib import Path
 
 from PIL import Image
 
+from image_converter_for_mp3_player.config import Settings
+from image_converter_for_mp3_player.utils.orientation import get_orientation
+
 logger = logging.getLogger(__name__)
 
 
 def apply_image_pipeline(
-    image_path: Path, fn: Callable, output_dir: Path, stem: str, settings
+    image_path: Path, func: Callable, output_dir: Path, stem: str, settings: Settings
 ):
     with Image.open(image_path) as img:
         img = _convert_rgb(img)
-        for i, result in enumerate(fn(img, settings)):
+        orientation = get_orientation(
+            img.size,
+            settings.landscape_resolution,
+            settings.threshold,
+        )
+        for i, result in enumerate(func(img, orientation, settings)):
             _thumbnail_to_screen(result, settings=settings)
             _save_as_jpg(result, output_dir, f"{stem}_{i}")
 

@@ -3,14 +3,13 @@ from collections.abc import Iterable
 from PIL import Image, ImageFilter, ImageOps
 
 from image_converter_for_mp3_player.config import BlurSettings
-from image_converter_for_mp3_player.utils import Orientation, get_orientation
+from image_converter_for_mp3_player.utils import Orientation
 
 
-def background_blur(img: Image.Image, settings: BlurSettings) -> Iterable[Image.Image]:
-    ori = get_orientation(
-        img.size,
-    )
-    if settings.rotatable_aspect_ratio:
+def background_blur(
+    img: Image.Image, ori: Orientation, settings: BlurSettings
+) -> Iterable[Image.Image]:
+    if settings.rotatable_screen:
         target_resolution = (
             settings.landscape_resolution
             if ori == Orientation.LANDSCAPE
