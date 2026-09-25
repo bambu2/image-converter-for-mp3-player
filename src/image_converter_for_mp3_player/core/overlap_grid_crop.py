@@ -3,7 +3,7 @@ from collections.abc import Iterable
 from PIL import Image
 
 from image_converter_for_mp3_player.config import OverlapGridCropSettings
-from image_converter_for_mp3_player.utils import Orientation
+from image_converter_for_mp3_player.utils import Orientation, axis_starts
 
 
 def overlap_grid_crop(
@@ -47,15 +47,6 @@ def _get_crop_size(
     return (int(crop_width), int(crop_height))
 
 
-def _axis_starts(img_size: int, crop_size: int, devision: int) -> list[int]:
-    if crop_size <= 0 or devision <= 0:
-        raise ValueError(f"crop_size={crop_size}, devision={devision} 必须为正")
-    if devision == 1 or crop_size >= img_size:
-        return [0]
-    step = (img_size - crop_size) // (devision - 1)
-    return [min(i * step, img_size - crop_size) for i in range(devision)]
-
-
 def _get_crop_boxes(
     img_size: tuple[int, int], crop_size: tuple[int, int]
 ) -> list[tuple[int, int, int, int]]:
@@ -70,7 +61,7 @@ def _get_crop_boxes(
     col = -(-img_width // crop_width)
     row = -(-img_height // crop_height)
 
-    xs = _axis_starts(img_width, crop_width, col)
-    ys = _axis_starts(img_height, crop_height, row)
+    xs = axis_starts(img_width, crop_width, col)
+    ys = axis_starts(img_height, crop_height, row)
 
     return [(x, y, x + crop_width, y + crop_height) for x in xs for y in ys]

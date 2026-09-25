@@ -43,3 +43,10 @@ def _save_as_jpg(img: Image.Image, output_dir: Path, stem: str) -> None:
             img.save(output_dir / f"{stem}.jpg", "JPEG", quality=100)
     except OSError as e:
         logger.error(f"Error processing: {e}")
+
+
+def axis_starts(img_size: int, crop_size: int, devision: int) -> list[int]:
+    if devision == 1 or crop_size >= img_size:
+        return [0]
+    step = (img_size - crop_size) // (devision - 1)
+    return [min(i * step, img_size - crop_size) for i in range(devision)]
