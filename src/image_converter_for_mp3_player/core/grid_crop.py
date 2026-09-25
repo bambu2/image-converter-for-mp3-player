@@ -10,7 +10,7 @@ from image_converter_for_mp3_player.utils import (
 )
 
 
-def crop_into_images(img: Image.Image, settings: CropSettings) -> Iterable[Image.Image]:
+def grid_crop(img: Image.Image, settings: CropSettings) -> Iterable[Image.Image]:
     img_size = img.size
 
     ori = get_orientation(img.size, settings)
@@ -22,7 +22,7 @@ def crop_into_images(img: Image.Image, settings: CropSettings) -> Iterable[Image
 
 
 def _get_crop_relative_size(img_size: tuple[int, int], settings: CropSettings) -> float:
-    crop_relative_size = settings.default_crop_relative_size
+    crop_relative_size = settings.crop_scale_factor
 
     if settings.long_img_max_crop and is_long_image(img_size, settings):
         crop_relative_size = settings.long_img_crop_relative_size

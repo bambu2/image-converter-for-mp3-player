@@ -4,10 +4,10 @@ from typing import Annotated
 
 import typer
 
-from image_converter_for_mp3_player.config import CropSettings, PadSettings
+from image_converter_for_mp3_player.config import CropSettings, BlurSettings
 from image_converter_for_mp3_player.core import (
-    apply_blurred_background,
-    crop_into_images,
+    background_blur,
+    grid_crop,
     process,
 )
 
@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 logger.info("程序启动")
 
-pad_settings = PadSettings()
+pad_settings = BlurSettings()
 crop_settings = CropSettings()
 
 
@@ -41,7 +41,7 @@ RotatableAspectRatio = Annotated[
 def pad(
     input_dir: InputDir = pad_settings.input_dir,
     output_dir: OutputDir = pad_settings.output_dir,
-    screen_resolution: ScreenResolution = pad_settings.screen_resolution,
+    screen_resolution: ScreenResolution = pad_settings.screen_resolution_str,
     recursive: Recursive = pad_settings.recursive,
     dry_run: DryRun = pad_settings.dry_run,
     rotatable_aspect_ratio: RotatableAspectRatio = pad_settings.rotatable_aspect_ratio,
@@ -56,14 +56,14 @@ def pad(
             "rotatable_aspect_ratio": rotatable_aspect_ratio,
         }
     )
-    process(apply_blurred_background, settings)
+    process(background_blur, settings)
 
 
 @app.command()
 def crop(
     input_dir: InputDir = crop_settings.input_dir,
     output_dir: OutputDir = crop_settings.output_dir,
-    screen_resolution: ScreenResolution = crop_settings.screen_resolution,
+    screen_resolution: ScreenResolution = crop_settings.screen_resolution_str,
     recursive: Recursive = crop_settings.recursive,
     dry_run: DryRun = crop_settings.dry_run,
     rotatable_aspect_ratio: RotatableAspectRatio = crop_settings.rotatable_aspect_ratio,
@@ -78,7 +78,7 @@ def crop(
             "rotatable_aspect_ratio": rotatable_aspect_ratio,
         }
     )
-    process(crop_into_images, settings)
+    process(grid_crop, settings)
 
 
 if __name__ == "__main__":

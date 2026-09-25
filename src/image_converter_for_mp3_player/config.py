@@ -9,12 +9,11 @@ class Settings(BaseSettings):
     input_dir: DirectoryPath = Path("input")
     output_dir: Path = Path("output")
 
-    screen_resolution: str = "320x240"
+    screen_resolution_str: str = "320x240"
 
-    screen_width: int = 0
-    screen_height: int = 0
-    screen_aspect_ratio: float = 0.0
-    rotated_screen_aspect_ratio: float = 0.0
+    screen_width: PositiveInt = 1
+    screen_height: PositiveInt = 1
+
     landscape_resolution: tuple[PositiveInt, PositiveInt] = (1, 1)
     portrait_resolution: tuple[PositiveInt, PositiveInt] = (1, 1)
 
@@ -26,26 +25,28 @@ class Settings(BaseSettings):
 
     @model_validator(mode="after")
     def _derive_screen_fields(self):
-        w_str, h_str = self.screen_resolution.lower().split("x")
-        self.screen_width = int(w_str)
-        self.screen_height = int(h_str)
-        screen_aspect_ratio = self.screen_width / self.screen_height
-        rotated_screen_aspect_ratio = self.screen_height / self.screen_width
+        self.screen_width = int(self.screen_resolution_str.split("x")[0])
+        self.screen_height = int(self.screen_resolution_str.split("x")[1])
+
         self.landscape_resolution = (self.screen_width, self.screen_height)
         self.portrait_resolution = (self.screen_height, self.screen_width)
         return self
 
 
-class PadSettings(Settings):
-    output_dir: Path = Path("output") / "pad"
+class BlurSettings(Settings):
+    output_dir: Path = Path("output") / "blur"
 
-    blur_radius: Annotated[float, Field(ge=0.0)] = 10.0
+    radius: Annotated[float, Field(ge=0.0)] = 10.0
 
 
 class CropSettings(Settings):
     output_dir: Path = Path("output") / "crop"
 
-    default_crop_relative_size: PositiveFloat = 0.5
-    long_img_max_crop: bool = True
-    long_img_threshold: PositiveFloat = 2.0
-    long_img_crop_relative_size: PositiveFloat = 1.0
+    crop_scale_factor: PositiveFloat = 0.5
+
+
+class EquidistantCropSettings(Settings):
+    output_dir: Path = Path("output") / "crop"
+
+    threshold: PositiveFloat = 2.0
+    scale_factor: PositiveFloat = 1.0

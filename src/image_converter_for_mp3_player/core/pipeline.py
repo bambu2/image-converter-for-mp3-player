@@ -6,13 +6,13 @@ import typer
 from PIL import Image
 from rich.progress import track
 
-from image_converter_for_mp3_player.config import CropSettings, PadSettings
+from image_converter_for_mp3_player.config import CropSettings, BlurSettings
 from image_converter_for_mp3_player.utils import apply_image_pipeline, get_image_paths
 
 logger = logging.getLogger(__name__)
 
 
-def process[S: PadSettings | CropSettings](
+def process[S: BlurSettings | CropSettings](
     fn: Callable[[Image.Image, S], Iterable[Image.Image]], settings: S
 ) -> None:
     try:
@@ -31,7 +31,7 @@ def process[S: PadSettings | CropSettings](
         apply_pipeline(fn, image_paths, settings)
 
 
-def apply_pipeline[S: PadSettings | CropSettings](
+def apply_pipeline[S: BlurSettings | CropSettings](
     fn: Callable[[Image.Image, S], Iterable[Image.Image]],
     image_paths: list[Path],
     settings: S,
