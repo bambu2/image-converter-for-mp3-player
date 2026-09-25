@@ -8,8 +8,7 @@ from rich.progress import track
 
 from image_converter_for_mp3_player.config import (
     BlurSettings,
-    EquidistantCropSettings,
-    OverlapGridCropSettings,
+    CropSettings,
 )
 from image_converter_for_mp3_player.utils import (
     Orientation,
@@ -20,7 +19,7 @@ from image_converter_for_mp3_player.utils import (
 logger = logging.getLogger(__name__)
 
 
-def process[S: BlurSettings | OverlapGridCropSettings | EquidistantCropSettings](
+def process[S: BlurSettings | CropSettings](
     fn: Callable[[Image.Image, Orientation, S], Iterable[Image.Image]],
     settings: S,
 ) -> None:
@@ -40,7 +39,7 @@ def process[S: BlurSettings | OverlapGridCropSettings | EquidistantCropSettings]
         apply_pipeline(fn, image_paths, settings)
 
 
-def apply_pipeline[S: BlurSettings | OverlapGridCropSettings | EquidistantCropSettings](
+def apply_pipeline[S: BlurSettings | CropSettings](
     func: Callable[[Image.Image, Orientation, S], Iterable[Image.Image]],
     image_paths: list[Path],
     settings: S,

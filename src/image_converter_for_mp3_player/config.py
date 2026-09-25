@@ -44,13 +44,19 @@ class BlurSettings(Settings):
     radius: PositiveFloat = 2.0
 
 
-class OverlapGridCropSettings(Settings):
-    output_dir: Path = Path("output") / "grid_crop"
+class CropSettings(Settings):
+    output_dir: Path = Path("output") / "crop"
 
     scale_factor: PositiveFloat = 0.5
 
 
-class EquidistantCropSettings(Settings):
+class EquidistantCropSettings(CropSettings):
     output_dir: Path = Path("output") / "equidistant_crop"
+
+    scale_factor: PositiveFloat = 0.5
+
+
+class WideImageCropSettings(CropSettings):
+    output_dir: Path = Path("output") / "wide_image_crop"
 
     scale_factor: PositiveFloat = 1.0
