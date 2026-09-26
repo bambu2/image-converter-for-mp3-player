@@ -10,17 +10,19 @@ from image_converter_for_mp3_player.config import (
     WideImageCropSettings,
 )
 from image_converter_for_mp3_player.core import (
+    apply_pipeline,
     background_blur,
     equidistant_crop,
-    process,
+    router,
 )
+from image_converter_for_mp3_player.utils.path_utils import get_image_paths
 
 logger = logging.getLogger(__name__)
 
 logger.info("程序启动")
 
 pad_settings = BlurSettings()
-overlap_grid_crop_settings = EquidistantCropSettings()
+equidistant_crop_settings = EquidistantCropSettings()
 wide_image_crop_settings = WideImageCropSettings()
 
 
@@ -39,6 +41,10 @@ DryRun = Annotated[
 ]
 RotatableScreen = Annotated[bool, typer.Option(help="allow to rotate the screen")]
 
+Radius = Annotated[float, typer.Option(help="radius of GaussianBlur")]
+
+ScaleFactor = Annotated[float, typer.Option(help="the scale factor of crop size")]
+
 
 @app.command()
 def blur(
@@ -49,6 +55,7 @@ def blur(
     recursive: Recursive = pad_settings.recursive,
     dry_run: DryRun = pad_settings.dry_run,
     rotatable_screen: RotatableScreen = pad_settings.rotatable_screen,
+    radius: Radius = pad_settings.radius,
 ):
     settings = pad_settings.model_copy(
         update={
@@ -59,22 +66,26 @@ def blur(
             "recursive": recursive,
             "dry_run": dry_run,
             "rotatable_screen": rotatable_screen,
+            "radius": radius,
         }
     )
-    process(background_blur, settings)
+    image_paths = get_image_paths(settings)
+    if image_paths is not None:
+        apply_pipeline(background_blur, image_paths, settings)
 
 
 @app.command()
 def crop(
-    input_dir: InputDir = overlap_grid_crop_settings.input_dir,
-    output_dir: OutputDir = overlap_grid_crop_settings.output_dir,
-    screen_resolution_str: ScreenResolutionStr = overlap_grid_crop_settings.screen_resolution_str,
+    input_dir: InputDir = equidistant_crop_settings.input_dir,
+    output_dir: OutputDir = equidistant_crop_settings.output_dir,
+    screen_resolution_str: ScreenResolutionStr = equidistant_crop_settings.screen_resolution_str,
     threshold: Threshold = pad_settings.threshold,
-    recursive: Recursive = overlap_grid_crop_settings.recursive,
-    dry_run: DryRun = overlap_grid_crop_settings.dry_run,
-    rotatable_screen: RotatableScreen = overlap_grid_crop_settings.rotatable_screen,
+    recursive: Recursive = equidistant_crop_settings.recursive,
+    dry_run: DryRun = equidistant_crop_settings.dry_run,
+    rotatable_screen: RotatableScreen = equidistant_crop_settings.rotatable_screen,
+    scale_factor: ScaleFactor = equidistant_crop_settings.scale_factor,
 ):
-    settings = overlap_grid_crop_settings.model_copy(
+    settings = equidistant_crop_settings.model_copy(
         update={
             "input_dir": input_dir,
             "output_dir": output_dir,
@@ -83,9 +94,12 @@ def crop(
             "recursive": recursive,
             "dry_run": dry_run,
             "rotatable_screen": rotatable_screen,
+            "scale_factor": scale_factor,
         }
     )
-    process(equidistant_crop, settings)
+    image_paths = get_image_paths(settings)
+    if image_paths is not None:
+        apply_pipeline(equidistant_crop, image_paths, settings)
 
 
 @app.command()
@@ -97,6 +111,7 @@ def widecrop(
     recursive: Recursive = wide_image_crop_settings.recursive,
     dry_run: DryRun = wide_image_crop_settings.dry_run,
     rotatable_screen: RotatableScreen = wide_image_crop_settings.rotatable_screen,
+    scale_factor: ScaleFactor = wide_image_crop_settings.scale_factor,
 ):
     settings = wide_image_crop_settings.model_copy(
         update={
@@ -107,9 +122,17 @@ def widecrop(
             "recursive": recursive,
             "dry_run": dry_run,
             "rotatable_screen": rotatable_screen,
+            "scale_factor": scale_factor,
         }
     )
-    process(equidistant_crop, settings)
+    image_paths = get_image_paths(settings)
+    if image_paths is not None:
+        apply_pipeline(equidistant_crop, image_paths, settings)
+
+
+@app.command()
+def route():
+    router.route(pad_settings, equidistant_crop_settings, wide_image_crop_settings)
 
 
 if __name__ == "__main__":
