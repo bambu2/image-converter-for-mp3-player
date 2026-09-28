@@ -1,6 +1,6 @@
 import pytest
 
-from image_converter_for_mp3_player.config import EquidistantCropSettings
+from image_converter_for_mp3_player.core.config import EquidistantCropSettings
 
 
 @pytest.fixture

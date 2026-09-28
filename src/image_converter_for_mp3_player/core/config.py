@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from pydantic import DirectoryPath, PositiveFloat, PositiveInt, model_validator
+from pydantic import DirectoryPath, Field, PositiveFloat, PositiveInt, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 toml_file = "config.toml"
@@ -43,7 +43,7 @@ class Settings(BaseSettings):
     input_dir: DirectoryPath
     output_dir: Path
 
-    screen_resolution_str: str
+    landscape_resolution_str: str
 
     landscape_width: PositiveInt
     landscape_height: PositiveInt
@@ -53,7 +53,7 @@ class Settings(BaseSettings):
     portrait_height: PositiveInt
     portrait_resolution: tuple[PositiveInt, PositiveInt]
 
-    threshold: PositiveFloat
+    threshold: float = Field(gt=1.0)
 
     recursive: bool
     dry_run: bool
@@ -64,8 +64,8 @@ class Settings(BaseSettings):
 
     @model_validator(mode="after")
     def _derive_screen_fields(self):
-        self.landscape_width = int(self.screen_resolution_str.split("x")[0])
-        self.landscape_height = int(self.screen_resolution_str.split("x")[1])
+        self.landscape_width = int(self.landscape_resolution_str.split("x")[0])
+        self.landscape_height = int(self.landscape_resolution_str.split("x")[1])
         self.landscape_resolution = (self.landscape_width, self.landscape_height)
 
         self.portrait_width = self.landscape_height

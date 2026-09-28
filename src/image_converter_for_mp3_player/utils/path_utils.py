@@ -1,12 +1,12 @@
 import logging
 from pathlib import Path
 
-from image_converter_for_mp3_player.config import BlurSettings, CropSettings
+from image_converter_for_mp3_player.core.config import Settings
 
 logger = logging.getLogger(__name__)
 
 
-def get_image_paths(settings: BlurSettings | CropSettings) -> list[Path] | None:
+def get_image_paths(settings: Settings) -> list[Path] | None:
     try:
         image_paths = _filter_image(
             settings.input_dir, settings.recursive, settings.img_exts
@@ -24,7 +24,7 @@ def get_image_paths(settings: BlurSettings | CropSettings) -> list[Path] | None:
         return image_paths
 
 
-def _filter_image(dir: Path, recursive: bool, img_exts: frozenset) -> list[Path]:
+def _filter_image(dir: Path, recursive: bool, img_exts: frozenset[str]) -> list[Path]:
     if recursive:
         return [p for p in dir.rglob("*") if p.suffix.lower() in img_exts]
     else:

@@ -2,7 +2,7 @@ from collections.abc import Iterable
 
 from PIL import Image
 
-from image_converter_for_mp3_player.config import Settings
+from image_converter_for_mp3_player.core.config import Settings
 from image_converter_for_mp3_player.utils import Orientation
 
 
@@ -22,7 +22,7 @@ def _get_crop_size(
 ) -> tuple[int, int]:
     img_width, img_height = img_size
 
-    if ori == Orientation.LANDSCAPE or ori == Orientation.PANORAMA:
+    if ori == Orientation.WIDER_THAN_SCREEN or ori == Orientation.WIDER_THAN_THRESHOLD:
         crop_width = img_width * scale_factor
 
         crop_height = crop_width / settings.landscape_width * settings.landscape_height

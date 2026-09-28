@@ -2,7 +2,7 @@ from collections.abc import Iterable
 
 from PIL import Image, ImageFilter, ImageOps
 
-from image_converter_for_mp3_player.config import Settings
+from image_converter_for_mp3_player.core.config import Settings
 from image_converter_for_mp3_player.utils import Orientation
 
 
@@ -12,7 +12,7 @@ def background_blur(
     if settings.rotatable_screen:
         target_resolution = (
             settings.landscape_resolution
-            if ori == Orientation.LANDSCAPE
+            if ori == Orientation.WIDER
             else settings.portrait_resolution
         )
     else:

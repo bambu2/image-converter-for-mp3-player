@@ -1,7 +1,7 @@
 input_dir = Path("input")
 output_dir = Path("output")
 
-screen_resolution_str = "320x240"
+landscape_resolution_str = "320x240"
 
 threshold = 2.0
 

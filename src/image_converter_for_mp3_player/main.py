@@ -4,13 +4,13 @@ from typing import Annotated
 
 import typer
 
-from image_converter_for_mp3_player.config import settings
 from image_converter_for_mp3_player.core import (
     apply_pipeline,
     background_blur,
     equidistant_crop,
-    router,
 )
+from image_converter_for_mp3_player.core.config import settings
+from image_converter_for_mp3_player.services import dispatcher
 from image_converter_for_mp3_player.utils.path_utils import get_image_paths
 
 logger = logging.getLogger(__name__)
@@ -42,7 +42,7 @@ ScaleFactor = Annotated[float, typer.Option(help="the scale factor of crop size"
 def blur(
     input_dir: InputDir = settings.input_dir,
     output_dir: OutputDir = settings.output_dir,
-    screen_resolution_str: ScreenResolutionStr = settings.screen_resolution_str,
+    screen_resolution_str: ScreenResolutionStr = settings.landscape_resolution_str,
     threshold: Threshold = settings.threshold,
     recursive: Recursive = settings.recursive,
     dry_run: DryRun = settings.dry_run,
@@ -69,7 +69,7 @@ def blur(
 def crop(
     input_dir: InputDir = settings.input_dir,
     output_dir: OutputDir = settings.output_dir,
-    screen_resolution_str: ScreenResolutionStr = settings.screen_resolution_str,
+    screen_resolution_str: ScreenResolutionStr = settings.landscape_resolution_str,
     threshold: Threshold = settings.threshold,
     recursive: Recursive = settings.recursive,
     dry_run: DryRun = settings.dry_run,
@@ -97,7 +97,7 @@ def crop(
 def widecrop(
     input_dir: InputDir = settings.input_dir,
     output_dir: OutputDir = settings.output_dir,
-    screen_resolution_str: ScreenResolutionStr = settings.screen_resolution_str,
+    screen_resolution_str: ScreenResolutionStr = settings.landscape_resolution_str,
     threshold: Threshold = settings.threshold,
     recursive: Recursive = settings.recursive,
     dry_run: DryRun = settings.dry_run,
@@ -123,7 +123,7 @@ def widecrop(
 
 @app.command()
 def route():
-    router.route(settings)
+    dispatcher.auto(settings)
 
 
 if __name__ == "__main__":
