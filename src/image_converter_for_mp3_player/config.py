@@ -1,30 +1,66 @@
 from pathlib import Path
 
 from pydantic import DirectoryPath, PositiveFloat, PositiveInt, model_validator
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+toml_file = "config.toml"
+
+
+class BlurSettings(BaseSettings):
+    model_config = SettingsConfigDict(
+        toml_file="toml_file", toml_table_header=("blur",), extra="ignore"
+    )
+    output_dir: Path
+
+    radius: float
+
+
+class EquidistantCropSettings(BaseSettings):
+    model_config = SettingsConfigDict(
+        toml_file="toml_file", toml_table_header=("equidistant-crop",), extra="ignore"
+    )
+    output_dir: Path
+
+    scale_factor: PositiveFloat
+
+
+class WideImageCropSettings(BaseSettings):
+    model_config = SettingsConfigDict(
+        toml_file="toml_file", toml_table_header=("wide-image-crop",), extra="ignore"
+    )
+    output_dir: Path
+
+    scale_factor: PositiveFloat
 
 
 class Settings(BaseSettings):
-    input_dir: DirectoryPath = Path("input")
-    output_dir: Path = Path("output")
+    model_config = SettingsConfigDict(toml_file="toml_file")
 
-    screen_resolution_str: str = "320x240"
+    blur_settings = BlurSettings()  # type:ignore[call-arg]
+    equidistant_crop_settings = EquidistantCropSettings()  # type:ignore[call-arg]
+    wide_image_crop_settings = WideImageCropSettings()  # type:ignore[call-arg]
 
-    landscape_width: PositiveInt = 1
-    landscape_height: PositiveInt = 1
-    landscape_resolution: tuple[PositiveInt, PositiveInt] = (1, 1)
+    input_dir: DirectoryPath
+    output_dir: Path
 
-    portrait_width: PositiveInt = 1
-    portrait_height: PositiveInt = 1
-    portrait_resolution: tuple[PositiveInt, PositiveInt] = (1, 1)
+    screen_resolution_str: str
 
-    threshold: PositiveFloat = 2.0
+    landscape_width: PositiveInt
+    landscape_height: PositiveInt
+    landscape_resolution: tuple[PositiveInt, PositiveInt]
 
-    recursive: bool = True
-    dry_run: bool = False
-    rotatable_screen: bool = True
+    portrait_width: PositiveInt
+    portrait_height: PositiveInt
+    portrait_resolution: tuple[PositiveInt, PositiveInt]
 
-    img_exts: frozenset = frozenset({".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp"})
+    threshold: PositiveFloat
+
+    recursive: bool
+    dry_run: bool
+
+    rotatable_screen: bool
+
+    img_exts: frozenset[str]
 
     @model_validator(mode="after")
     def _derive_screen_fields(self):
@@ -34,29 +70,8 @@ class Settings(BaseSettings):
 
         self.portrait_width = self.landscape_height
         self.portrait_height = self.landscape_width
-        self.portrait_resolution = (self.portrait_width, self.landscape_height)
+        self.portrait_resolution = (self.portrait_width, self.portrait_height)
         return self
 
 
-class BlurSettings(Settings):
-    output_dir: Path = Path("output") / "blur"
-
-    radius: PositiveFloat = 2.0
-
-
-class CropSettings(Settings):
-    output_dir: Path = Path("output") / "crop"
-
-    scale_factor: PositiveFloat = 0.5
-
-
-class EquidistantCropSettings(CropSettings):
-    output_dir: Path = Path("output") / "equidistant_crop"
-
-    scale_factor: PositiveFloat = 0.5
-
-
-class WideImageCropSettings(CropSettings):
-    output_dir: Path = Path("output") / "wide_image_crop"
-
-    scale_factor: PositiveFloat = 1.0
+settings = Settings()  # type: ignore[call-arg]

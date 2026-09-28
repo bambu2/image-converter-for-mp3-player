@@ -4,11 +4,7 @@ from typing import Annotated
 
 import typer
 
-from image_converter_for_mp3_player.config import (
-    BlurSettings,
-    EquidistantCropSettings,
-    WideImageCropSettings,
-)
+from image_converter_for_mp3_player.config import settings
 from image_converter_for_mp3_player.core import (
     apply_pipeline,
     background_blur,
@@ -20,10 +16,6 @@ from image_converter_for_mp3_player.utils.path_utils import get_image_paths
 logger = logging.getLogger(__name__)
 
 logger.info("程序启动")
-
-pad_settings = BlurSettings()
-equidistant_crop_settings = EquidistantCropSettings()
-wide_image_crop_settings = WideImageCropSettings()
 
 
 app = typer.Typer()
@@ -48,16 +40,16 @@ ScaleFactor = Annotated[float, typer.Option(help="the scale factor of crop size"
 
 @app.command()
 def blur(
-    input_dir: InputDir = pad_settings.input_dir,
-    output_dir: OutputDir = pad_settings.output_dir,
-    screen_resolution_str: ScreenResolutionStr = pad_settings.screen_resolution_str,
-    threshold: Threshold = pad_settings.threshold,
-    recursive: Recursive = pad_settings.recursive,
-    dry_run: DryRun = pad_settings.dry_run,
-    rotatable_screen: RotatableScreen = pad_settings.rotatable_screen,
-    radius: Radius = pad_settings.radius,
+    input_dir: InputDir = settings.input_dir,
+    output_dir: OutputDir = settings.output_dir,
+    screen_resolution_str: ScreenResolutionStr = settings.screen_resolution_str,
+    threshold: Threshold = settings.threshold,
+    recursive: Recursive = settings.recursive,
+    dry_run: DryRun = settings.dry_run,
+    rotatable_screen: RotatableScreen = settings.rotatable_screen,
+    radius: Radius = settings.radius,
 ):
-    settings = pad_settings.model_copy(
+    settings = settings.model_copy(
         update={
             "input_dir": input_dir,
             "output_dir": output_dir,
@@ -76,16 +68,16 @@ def blur(
 
 @app.command()
 def crop(
-    input_dir: InputDir = equidistant_crop_settings.input_dir,
-    output_dir: OutputDir = equidistant_crop_settings.output_dir,
-    screen_resolution_str: ScreenResolutionStr = equidistant_crop_settings.screen_resolution_str,
-    threshold: Threshold = pad_settings.threshold,
-    recursive: Recursive = equidistant_crop_settings.recursive,
-    dry_run: DryRun = equidistant_crop_settings.dry_run,
-    rotatable_screen: RotatableScreen = equidistant_crop_settings.rotatable_screen,
-    scale_factor: ScaleFactor = equidistant_crop_settings.scale_factor,
+    input_dir: InputDir = settings.input_dir,
+    output_dir: OutputDir = settings.output_dir,
+    screen_resolution_str: ScreenResolutionStr = settings.screen_resolution_str,
+    threshold: Threshold = settings.threshold,
+    recursive: Recursive = settings.recursive,
+    dry_run: DryRun = settings.dry_run,
+    rotatable_screen: RotatableScreen = settings.rotatable_screen,
+    scale_factor: ScaleFactor = settings.scale_factor,
 ):
-    settings = equidistant_crop_settings.model_copy(
+    settings = settings.model_copy(
         update={
             "input_dir": input_dir,
             "output_dir": output_dir,
@@ -104,16 +96,16 @@ def crop(
 
 @app.command()
 def widecrop(
-    input_dir: InputDir = wide_image_crop_settings.input_dir,
-    output_dir: OutputDir = wide_image_crop_settings.output_dir,
-    screen_resolution_str: ScreenResolutionStr = wide_image_crop_settings.screen_resolution_str,
-    threshold: Threshold = pad_settings.threshold,
-    recursive: Recursive = wide_image_crop_settings.recursive,
-    dry_run: DryRun = wide_image_crop_settings.dry_run,
-    rotatable_screen: RotatableScreen = wide_image_crop_settings.rotatable_screen,
-    scale_factor: ScaleFactor = wide_image_crop_settings.scale_factor,
+    input_dir: InputDir = settings.input_dir,
+    output_dir: OutputDir = settings.output_dir,
+    screen_resolution_str: ScreenResolutionStr = settings.screen_resolution_str,
+    threshold: Threshold = settings.threshold,
+    recursive: Recursive = settings.recursive,
+    dry_run: DryRun = settings.dry_run,
+    rotatable_screen: RotatableScreen = settings.rotatable_screen,
+    scale_factor: ScaleFactor = settings.scale_factor,
 ):
-    settings = wide_image_crop_settings.model_copy(
+    settings = settings.model_copy(
         update={
             "input_dir": input_dir,
             "output_dir": output_dir,
@@ -132,7 +124,7 @@ def widecrop(
 
 @app.command()
 def route():
-    router.route(pad_settings, equidistant_crop_settings, wide_image_crop_settings)
+    router.route(settings, settings, settings)
 
 
 if __name__ == "__main__":
