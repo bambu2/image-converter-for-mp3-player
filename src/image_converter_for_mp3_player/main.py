@@ -47,9 +47,9 @@ def blur(
     recursive: Recursive = settings.recursive,
     dry_run: DryRun = settings.dry_run,
     rotatable_screen: RotatableScreen = settings.rotatable_screen,
-    radius: Radius = settings.radius,
+    radius: Radius = settings.blur.radius,
 ):
-    settings = settings.model_copy(
+    updated_settings = settings.model_copy(
         update={
             "input_dir": input_dir,
             "output_dir": output_dir,
@@ -58,12 +58,11 @@ def blur(
             "recursive": recursive,
             "dry_run": dry_run,
             "rotatable_screen": rotatable_screen,
-            "radius": radius,
         }
     )
-    image_paths = get_image_paths(settings)
+    image_paths = get_image_paths(updated_settings)
     if image_paths is not None:
-        apply_pipeline(background_blur, image_paths, settings)
+        apply_pipeline(background_blur, image_paths, updated_settings)
 
 
 @app.command()
@@ -75,9 +74,9 @@ def crop(
     recursive: Recursive = settings.recursive,
     dry_run: DryRun = settings.dry_run,
     rotatable_screen: RotatableScreen = settings.rotatable_screen,
-    scale_factor: ScaleFactor = settings.scale_factor,
+    scale_factor: ScaleFactor = settings.equidistant_crop.scale_factor,
 ):
-    settings = settings.model_copy(
+    updated_settings = settings.model_copy(
         update={
             "input_dir": input_dir,
             "output_dir": output_dir,
@@ -89,9 +88,9 @@ def crop(
             "scale_factor": scale_factor,
         }
     )
-    image_paths = get_image_paths(settings)
+    image_paths = get_image_paths(updated_settings)
     if image_paths is not None:
-        apply_pipeline(equidistant_crop, image_paths, settings)
+        apply_pipeline(equidistant_crop, image_paths, updated_settings)
 
 
 @app.command()
@@ -103,9 +102,9 @@ def widecrop(
     recursive: Recursive = settings.recursive,
     dry_run: DryRun = settings.dry_run,
     rotatable_screen: RotatableScreen = settings.rotatable_screen,
-    scale_factor: ScaleFactor = settings.scale_factor,
+    scale_factor: ScaleFactor = settings.wide_image_crop.scale_factor,
 ):
-    settings = settings.model_copy(
+    updated_settings = settings.model_copy(
         update={
             "input_dir": input_dir,
             "output_dir": output_dir,
@@ -117,14 +116,14 @@ def widecrop(
             "scale_factor": scale_factor,
         }
     )
-    image_paths = get_image_paths(settings)
+    image_paths = get_image_paths(updated_settings)
     if image_paths is not None:
-        apply_pipeline(equidistant_crop, image_paths, settings)
+        apply_pipeline(equidistant_crop, image_paths, updated_settings)
 
 
 @app.command()
 def route():
-    router.route(settings, settings, settings)
+    router.route(settings)
 
 
 if __name__ == "__main__":

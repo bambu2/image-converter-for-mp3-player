@@ -2,12 +2,12 @@ from collections.abc import Iterable
 
 from PIL import Image, ImageFilter, ImageOps
 
-from image_converter_for_mp3_player.config import BlurSettings
+from image_converter_for_mp3_player.config import Settings
 from image_converter_for_mp3_player.utils import Orientation
 
 
 def background_blur(
-    img: Image.Image, ori: Orientation, settings: BlurSettings
+    img: Image.Image, ori: Orientation, settings: Settings, radius: float
 ) -> Iterable[Image.Image]:
     if settings.rotatable_screen:
         target_resolution = (
@@ -19,7 +19,7 @@ def background_blur(
         target_resolution = settings.landscape_resolution
 
     bg = ImageOps.fit(img, target_resolution, method=Image.Resampling.LANCZOS)
-    bg = bg.filter(ImageFilter.GaussianBlur(radius=settings.radius))
+    bg = bg.filter(ImageFilter.GaussianBlur(radius=radius))
 
     img.thumbnail(target_resolution, Image.Resampling.LANCZOS)
 

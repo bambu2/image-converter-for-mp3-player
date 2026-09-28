@@ -2,34 +2,32 @@ from collections.abc import Iterable
 
 from PIL import Image
 
-from image_converter_for_mp3_player.config import CropSettings
+from image_converter_for_mp3_player.config import Settings
 from image_converter_for_mp3_player.utils import Orientation
 
 
 def equidistant_crop(
-    img: Image.Image, ori: Orientation, settings: CropSettings
+    img: Image.Image, ori: Orientation, settings: Settings, scale_factor: float
 ) -> Iterable[Image.Image]:
     img_size = img.size
 
-    crop_size = _get_crop_size(img_size, ori, settings)
+    crop_size = _get_crop_size(img_size, ori, settings, scale_factor)
     crop_boxes = _get_crop_boxes(img_size, crop_size)
     for box in crop_boxes:
         yield img.crop(box)
 
 
 def _get_crop_size(
-    img_size: tuple[int, int],
-    ori: Orientation,
-    settings: CropSettings,
+    img_size: tuple[int, int], ori: Orientation, settings: Settings, scale_factor: float
 ) -> tuple[int, int]:
     img_width, img_height = img_size
 
     if ori == Orientation.LANDSCAPE or ori == Orientation.PANORAMA:
-        crop_width = img_width * settings.scale_factor
+        crop_width = img_width * scale_factor
 
         crop_height = crop_width / settings.landscape_width * settings.landscape_height
     else:
-        crop_height = img_height * settings.scale_factor
+        crop_height = img_height * scale_factor
         if settings.rotatable_screen:
             crop_width = (
                 crop_height / settings.portrait_height * settings.portrait_width

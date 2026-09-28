@@ -3,12 +3,7 @@ from pathlib import Path
 
 from PIL import Image
 
-from image_converter_for_mp3_player.config import (
-    BlurSettings,
-    CropSettings,
-    EquidistantCropSettings,
-    WideImageCropSettings,
-)
+from image_converter_for_mp3_player.config import Settings
 from image_converter_for_mp3_player.core.background_blur import background_blur
 from image_converter_for_mp3_player.core.equidistant_crop import equidistant_crop
 from image_converter_for_mp3_player.core.pipeline import apply_pipeline
@@ -19,11 +14,11 @@ from image_converter_for_mp3_player.utils import (
 )
 
 
-def execute[S: BlurSettings | CropSettings](
+def execute(
     image_paths: list[Path] | None,
-    func: Callable[[Image.Image, Orientation, S], Iterable[Image.Image]],
+    func: Callable[[Image.Image, Orientation, Settings, float], Iterable[Image.Image]],
     filter: Callable,
-    settings: S,
+    settings: Settings,
 ) -> None:
     if image_paths is not None:
         for path in image_paths:
@@ -39,45 +34,27 @@ def execute[S: BlurSettings | CropSettings](
             apply_pipeline(func, image_paths, settings)
 
 
-def blur_filter(ori) -> bool:
+def blur_filter(orientation: Orientation) -> bool:
     return (
-        ori == Orientation.LANDSCAPE
-        or ori == Orientation.SIMILAR_ASPECT_RATIO
-        or ori == Orientation.PORTRAIT
+        orientation == Orientation.LANDSCAPE
+        or orientation == Orientation.SIMILAR_ASPECT_RATIO
+        or orientation == Orientation.PORTRAIT
     )
 
 
-def equidistant_crop_filter(ori) -> bool:
+def equidistant_crop_filter(orientation: Orientation) -> bool:
     return (
-        ori == Orientation.LANDSCAPE
-        or ori == Orientation.SIMILAR_ASPECT_RATIO
-        or ori == Orientation.PORTRAIT
+        orientation == Orientation.LANDSCAPE
+        or orientation == Orientation.SIMILAR_ASPECT_RATIO
+        or orientation == Orientation.PORTRAIT
     )
 
 
-def wide_image_crop_filter(ori) -> bool:
-    return ori == Orientation.PANORAMA or ori == Orientation.LONG_IMAGE
+def wide_image_crop_filter(orientation: Orientation) -> bool:
+    return orientation == Orientation.PANORAMA or orientation == Orientation.LONG_IMAGE
 
 
-def route(
-    blur_settings: BlurSettings,
-    equidistant_crop_settings: EquidistantCropSettings,
-    wide_image_crop_settings: WideImageCropSettings,
-):
-    blur_image_paths = get_image_paths(blur_settings)
-    equidistant_crop_image_paths = get_image_paths(equidistant_crop_settings)
-    wide_image_crop_image_paths = get_image_paths(wide_image_crop_settings)
+def route(settings: Settings) -> None:
+    image_paths = get_image_paths(settings)
 
-    execute(blur_image_paths, background_blur, blur_filter, blur_settings)
-    execute(
-        equidistant_crop_image_paths,
-        equidistant_crop,
-        equidistant_crop_filter,
-        equidistant_crop_settings,
-    )
-    execute(
-        wide_image_crop_image_paths,
-        equidistant_crop,
-        wide_image_crop_filter,
-        wide_image_crop_settings,
-    )
+    execute()

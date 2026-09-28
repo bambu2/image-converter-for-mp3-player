@@ -36,9 +36,9 @@ class WideImageCropSettings(BaseSettings):
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(toml_file="toml_file")
 
-    blur_settings = BlurSettings()  # type:ignore[call-arg]
-    equidistant_crop_settings = EquidistantCropSettings()  # type:ignore[call-arg]
-    wide_image_crop_settings = WideImageCropSettings()  # type:ignore[call-arg]
+    blur = BlurSettings()  # type:ignore[call-arg]
+    equidistant_crop = EquidistantCropSettings()  # type:ignore[call-arg]
+    wide_image_crop = WideImageCropSettings()  # type:ignore[call-arg]
 
     input_dir: DirectoryPath
     output_dir: Path
