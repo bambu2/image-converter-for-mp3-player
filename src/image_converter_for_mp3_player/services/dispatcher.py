@@ -3,7 +3,7 @@ from pathlib import Path
 
 from PIL import Image
 
-from image_converter_for_mp3_player.core.config import Settings
+from image_converter_for_mp3_player.core import Settings
 from image_converter_for_mp3_player.services.background_blur import background_blur
 from image_converter_for_mp3_player.services.equidistant_crop import equidistant_crop
 from image_converter_for_mp3_player.services.pipeline import apply_pipeline
@@ -33,7 +33,11 @@ def dispatch(
                     Orientation.SIMILAR_ASPECT_RATIO,
                     Orientation.NARROWER_THAN_SCREEN,
                 ):
-                    background_blur()
+                    apply_pipeline(
+                        partial(background_blur, radius=radius),
+                        updated_settings,
+                        output_dir,
+                    )
                     equidistant_crop()
                 else:
                     equidistant_crop()

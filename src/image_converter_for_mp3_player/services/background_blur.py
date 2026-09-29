@@ -2,7 +2,7 @@ from collections.abc import Iterable
 
 from PIL import Image, ImageFilter, ImageOps
 
-from image_converter_for_mp3_player.core.config import Settings
+from image_converter_for_mp3_player.core import Settings
 from image_converter_for_mp3_player.utils import Orientation
 
 

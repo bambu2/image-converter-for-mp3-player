@@ -5,14 +5,14 @@ from typing import Annotated
 
 import typer
 
-from image_converter_for_mp3_player.core import (
+from image_converter_for_mp3_player.core.config import settings
+from image_converter_for_mp3_player.services import (
     apply_pipeline,
     background_blur,
+    dispatcher,
     equidistant_crop,
 )
-from image_converter_for_mp3_player.core.config import settings
-from image_converter_for_mp3_player.services import dispatcher
-from image_converter_for_mp3_player.utils.path_utils import get_image_paths
+from image_converter_for_mp3_player.utils import get_image_paths
 
 logger = logging.getLogger(__name__)
 
@@ -69,7 +69,10 @@ def blur(
         print(f"[DRY RUN] output_dir: {output_dir}")
     else:
         apply_pipeline(
-            partial(background_blur, radius=radius), updated_settings, output_dir
+            image_paths,
+            partial(background_blur, radius=radius),
+            updated_settings,
+            output_dir,
         )
 
 
@@ -104,6 +107,7 @@ def crop(
         print(f"[DRY RUN] output_dir: {output_dir}")
     else:
         apply_pipeline(
+            image_paths,
             partial(equidistant_crop, scale_factor=scale_factor),
             updated_settings,
             output_dir,
@@ -141,6 +145,7 @@ def widecrop(
         print(f"[DRY RUN] output_dir: {output_dir}")
     else:
         apply_pipeline(
+            image_paths,
             partial(equidistant_crop, scale_factor=scale_factor),
             updated_settings,
             output_dir,
