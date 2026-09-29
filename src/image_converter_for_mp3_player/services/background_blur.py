@@ -12,7 +12,7 @@ def background_blur(
     if settings.rotatable_screen:
         target_resolution = (
             settings.landscape_resolution
-            if ori == Orientation.WIDER
+            if ori in (Orientation.WIDER_THAN_SCREEN, Orientation.WIDER_THAN_THRESHOLD)
             else settings.portrait_resolution
         )
     else:

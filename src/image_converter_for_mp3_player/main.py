@@ -1,4 +1,5 @@
 import logging
+from functools import partial
 from pathlib import Path
 from typing import Annotated
 
@@ -41,7 +42,7 @@ ScaleFactor = Annotated[float, typer.Option(help="the scale factor of crop size"
 @app.command()
 def blur(
     input_dir: InputDir = settings.input_dir,
-    output_dir: OutputDir = settings.output_dir,
+    output_dir: OutputDir = settings.blur.output_dir,
     screen_resolution_str: ScreenResolutionStr = settings.landscape_resolution_str,
     threshold: Threshold = settings.threshold,
     recursive: Recursive = settings.recursive,
@@ -60,15 +61,22 @@ def blur(
             "rotatable_screen": rotatable_screen,
         }
     )
+    output_dir.mkdir(parents=True, exist_ok=True)
     image_paths = get_image_paths(updated_settings)
-    if image_paths is not None:
-        apply_pipeline(background_blur, image_paths, updated_settings)
+    if settings.dry_run:
+        print(f"[DRY RUN] input_dir: {settings.input_dir}")
+        print(f"[DRY RUN] image_paths: {image_paths}")
+        print(f"[DRY RUN] output_dir: {output_dir}")
+    else:
+        apply_pipeline(
+            partial(background_blur, radius=radius), updated_settings, output_dir
+        )
 
 
 @app.command()
 def crop(
     input_dir: InputDir = settings.input_dir,
-    output_dir: OutputDir = settings.output_dir,
+    output_dir: OutputDir = settings.equidistant_crop.output_dir,
     screen_resolution_str: ScreenResolutionStr = settings.landscape_resolution_str,
     threshold: Threshold = settings.threshold,
     recursive: Recursive = settings.recursive,
@@ -88,15 +96,24 @@ def crop(
             "scale_factor": scale_factor,
         }
     )
+    output_dir.mkdir(parents=True, exist_ok=True)
     image_paths = get_image_paths(updated_settings)
-    if image_paths is not None:
-        apply_pipeline(equidistant_crop, image_paths, updated_settings)
+    if settings.dry_run:
+        print(f"[DRY RUN] input_dir: {settings.input_dir}")
+        print(f"[DRY RUN] image_paths: {image_paths}")
+        print(f"[DRY RUN] output_dir: {output_dir}")
+    else:
+        apply_pipeline(
+            partial(equidistant_crop, scale_factor=scale_factor),
+            updated_settings,
+            output_dir,
+        )
 
 
 @app.command()
 def widecrop(
     input_dir: InputDir = settings.input_dir,
-    output_dir: OutputDir = settings.output_dir,
+    output_dir: OutputDir = settings.wide_image_crop.output_dir,
     screen_resolution_str: ScreenResolutionStr = settings.landscape_resolution_str,
     threshold: Threshold = settings.threshold,
     recursive: Recursive = settings.recursive,
@@ -116,9 +133,18 @@ def widecrop(
             "scale_factor": scale_factor,
         }
     )
+    output_dir.mkdir(parents=True, exist_ok=True)
     image_paths = get_image_paths(updated_settings)
-    if image_paths is not None:
-        apply_pipeline(equidistant_crop, image_paths, updated_settings)
+    if settings.dry_run:
+        print(f"[DRY RUN] input_dir: {settings.input_dir}")
+        print(f"[DRY RUN] image_paths: {image_paths}")
+        print(f"[DRY RUN] output_dir: {output_dir}")
+    else:
+        apply_pipeline(
+            partial(equidistant_crop, scale_factor=scale_factor),
+            updated_settings,
+            output_dir,
+        )
 
 
 @app.command()

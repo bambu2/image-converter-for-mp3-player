@@ -6,22 +6,12 @@ from image_converter_for_mp3_player.core.config import Settings
 logger = logging.getLogger(__name__)
 
 
-def get_image_paths(settings: Settings) -> list[Path] | None:
+def get_image_paths(settings: Settings) -> list[Path]:
     try:
-        image_paths = _filter_image(
-            settings.input_dir, settings.recursive, settings.img_exts
-        )
-    except (NotADirectoryError, FileNotFoundError, PermissionError) as e:
+        return _filter_image(settings.input_dir, settings.recursive, settings.img_exts)
+    except OSError as e:
         logger.error(f"Error processing: {e}")
-        raise
-
-    if settings.dry_run:
-        print(f"[DRY RUN] input_dir: {settings.input_dir}")
-        print(f"[DRY RUN] image_paths: {image_paths}")
-        print(f"[DRY RUN] output_dir: {settings.output_dir}")
-        return None
-    else:
-        return image_paths
+        raise OSError(f"Error processing: {e}")
 
 
 def _filter_image(dir: Path, recursive: bool, img_exts: frozenset[str]) -> list[Path]:
