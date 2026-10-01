@@ -61,7 +61,7 @@ def blur(
 
     update = settings_update | {"blur": new_blur}
 
-    process(update, sub_dir, Mode.BLUR)
+    process(update, output_dir / sub_dir, Mode.BLUR)
 
 
 @app.command()
@@ -93,13 +93,13 @@ def equidistant_crop(
 
     update = settings_update | {"equidistant_crop": new_equidistant_crop}
 
-    process(update, output_dir, Mode.EQUIDISTANT_CROP)
+    process(update, output_dir / sub_dir, Mode.EQUIDISTANT_CROP)
 
 
 @app.command()
 def extreme_crop(
     input_dir: InputDir = settings.input_dir,
-    output_dir: OutputDir = settings.extreme_crop.sub_dir,
+    output_dir: OutputDir = settings.output_dir,
     landscape_res_str: LandscapeResStr = settings.landscape_res_str,
     threshold: Threshold = settings.threshold,
     recursive: Recursive = settings.recursive,
@@ -125,7 +125,7 @@ def extreme_crop(
 
     update = settings_update | {"extreme_crop": new_extreme_crop}
 
-    process(update, output_dir, Mode.EXTREME_CROP)
+    process(update, output_dir / sub_dir, Mode.EXTREME_CROP)
 
 
 @app.command()
@@ -170,7 +170,7 @@ def auto(
         | {"auto": new_auto}
     )
 
-    process(update, output_dir, Mode.AUTO)
+    process(update, output_dir / sub_dir, Mode.AUTO)
 
 
 def get_settings_update(
@@ -193,9 +193,7 @@ def get_settings_update(
     }
 
 
-def process(
-    update: dict[str, Any], output_dir: Path, mode: Mode, **kwargs: Any
-) -> None:
+def process(update: dict[str, Any], output_dir: Path, mode: Mode) -> None:
     updated_settings = settings.model_copy(update=update)
     image_paths = get_image_paths(updated_settings)
     if updated_settings.dry_run:
