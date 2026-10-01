@@ -57,16 +57,18 @@ def blur_process(
     orientation: Orientation,
 ) -> None:
     output_dir = target_dir(
-        settings.output_dir / settings.blur.sub_dir, settings.input_dir, path
+        input_dir=settings.input_dir,
+        output_dir=settings.output_dir / settings.blur.sub_dir,
+        path=path,
     )
-    output_dir.mkdir(parents=True, exist_ok=True)
     img_iter = background_blur(img, orientation, settings, settings.blur.radius)
 
     post_process(
         img_iter=img_iter,
         size=settings.landscape_resolution,
         output_dir=output_dir,
-        stem=path.stem,
+        img_name=path.stem,
+        suffix=str(settings.blur.sub_dir),
     )
 
 
@@ -77,11 +79,10 @@ def equidistant_crop_process(
     orientation: Orientation,
 ) -> None:
     output_dir = target_dir(
-        settings.output_dir / settings.equidistant_crop.sub_dir,
-        settings.input_dir,
-        path,
+        input_dir=settings.input_dir,
+        output_dir=settings.output_dir / settings.equidistant_crop.sub_dir,
+        path=path,
     )
-    output_dir.mkdir(parents=True, exist_ok=True)
     img_iter = equidistant_crop(
         img, orientation, settings, settings.equidistant_crop.scale_factor
     )
@@ -90,7 +91,8 @@ def equidistant_crop_process(
         img_iter=img_iter,
         size=settings.landscape_resolution,
         output_dir=output_dir,
-        stem=path.stem,
+        img_name=path.stem,
+        suffix=str(settings.equidistant_crop.sub_dir),
     )
 
 
@@ -101,9 +103,10 @@ def extreme_crop_process(
     orientation: Orientation,
 ) -> None:
     output_dir = target_dir(
-        settings.output_dir / settings.extreme_crop.sub_dir, settings.input_dir, path
+        input_dir=settings.input_dir,
+        output_dir=settings.output_dir / settings.extreme_crop.sub_dir,
+        path=path,
     )
-    output_dir.mkdir(parents=True, exist_ok=True)
     img_iter = equidistant_crop(
         img, orientation, settings, settings.extreme_crop.scale_factor
     )
@@ -112,5 +115,6 @@ def extreme_crop_process(
         img_iter=img_iter,
         size=settings.landscape_resolution,
         output_dir=output_dir,
-        stem=path.stem,
+        img_name=path.stem,
+        suffix=str(settings.extreme_crop.sub_dir),
     )

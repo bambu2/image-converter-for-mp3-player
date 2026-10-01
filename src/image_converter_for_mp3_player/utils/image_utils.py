@@ -11,7 +11,8 @@ def post_process(
     img_iter: Iterable[Image.Image],
     size: tuple[int, int],
     output_dir: Path,
-    stem: str,
+    img_name: str,
+    suffix: str,
 ) -> None:
     """Save thumbnails of `img_iter` as `<stem>_<i>.jpg` in `output_dir`.
 
@@ -20,7 +21,7 @@ def post_process(
     """
     for i, result_img in enumerate(img_iter):
         thumb = _thumbnail_to_screen(result_img, size)
-        _save_as_jpg(thumb, output_dir / f"{stem}_{i}.jpg")
+        _save_as_jpg(thumb, output_dir / f"{img_name}_{suffix}_{i}.jpg")
 
 
 def _thumbnail_to_screen(img: Image.Image, size: tuple[int, int]) -> Image.Image:
@@ -29,10 +30,8 @@ def _thumbnail_to_screen(img: Image.Image, size: tuple[int, int]) -> Image.Image
     return thumb
 
 
-def _save_as_jpg(img: Image.Image, path: Path) -> None:
-    try:
+def _save_as_jpg(img: Image.Image, save_path: Path) -> None:
+    with img:
         if img.mode != "RGB":
             img = img.convert("RGB")
-        img.save(path, "JPEG", quality=90, subsumpling=0)
-    finally:
-        img.close()
+        img.save(save_path, "JPEG", quality=90, subsumpling=0)
