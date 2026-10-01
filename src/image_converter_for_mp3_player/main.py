@@ -59,7 +59,7 @@ def blur(
 
 
 @app.command()
-def eqcrop(
+def equidistant_crop(
     input_dir: InputDir = settings.input_dir,
     output_dir: OutputDir = settings.equidistant_crop.output_dir,
     screen_resolution_str: ScreenResolutionStr = settings.landscape_resolution_str,
@@ -84,7 +84,7 @@ def eqcrop(
 
 
 @app.command()
-def excrop(
+def extreme_crop(
     input_dir: InputDir = settings.input_dir,
     output_dir: OutputDir = settings.extreme_crop.output_dir,
     screen_resolution_str: ScreenResolutionStr = settings.landscape_resolution_str,
