@@ -1,68 +1,103 @@
-from collections.abc import Callable, Iterable
+from enum import Enum, auto
 from pathlib import Path
 
 from PIL import Image
 
-from image_converter_for_mp3_player.core import Settings
+from image_converter_for_mp3_player.core.config import Settings
 from image_converter_for_mp3_player.services.background_blur import background_blur
 from image_converter_for_mp3_player.services.equidistant_crop import equidistant_crop
-from image_converter_for_mp3_player.services.pipeline import apply_pipeline
 from image_converter_for_mp3_player.utils import (
     Orientation,
-    get_image_paths,
     get_orientation,
+    post_process,
 )
 
 
-def dispatch(
-    image_paths: list[Path] | None,
-    func: Callable[[Image.Image, Orientation, Settings, float], Iterable[Image.Image]],
-    settings: Settings,
-) -> None:
-    if image_paths is not None:
-        for path in image_paths:
-            with Image.open(path) as img:
-                image_paths = []
-                orientation = get_orientation(
-                    img.size,
-                    (settings.landscape_width, settings.landscape_height),
-                    settings.threshold,
-                )
+class Mode(Enum):
+    BLUR = auto()
+    EQUIDISTANT_CROP = auto()
+    EXTREME_CROP = auto()
+    AUTO = auto()
+
+
+def dispatch(path: Path, settings: Settings, mode: Mode, output_dir: Path) -> None:
+    with Image.open(path) as img:
+        orientation = get_orientation(
+            img.size,
+            (settings.landscape_width, settings.landscape_height),
+            settings.threshold,
+        )
+        match mode:
+            case Mode.BLUR:
+                blur_process(img, path, settings, output_dir, orientation)
+            case Mode.EQUIDISTANT_CROP:
+                equidistant_crop_process(img, path, settings, output_dir, orientation)
+            case Mode.EXTREME_CROP:
+                extreme_crop_process(img, path, settings, output_dir, orientation)
+            case Mode.AUTO:
                 if orientation in (
                     Orientation.WIDER_THAN_SCREEN,
                     Orientation.SIMILAR_ASPECT_RATIO,
                     Orientation.NARROWER_THAN_SCREEN,
                 ):
-                    apply_pipeline(
-                        partial(background_blur, radius=radius),
-                        updated_settings,
-                        output_dir,
+                    blur_process(img, path, settings, output_dir, orientation)
+                    equidistant_crop_process(
+                        img, path, settings, output_dir, orientation
                     )
-                    equidistant_crop()
                 else:
-                    equidistant_crop()
+                    extreme_crop_process(img, path, settings, output_dir, orientation)
 
 
-def blur_filter(orientation: Orientation) -> bool:
-    return
+def blur_process(
+    img: Image.Image,
+    path: Path,
+    settings: Settings,
+    output_dir: Path,
+    orientation: Orientation,
+) -> None:
+    img_iter = background_blur(img, orientation, settings, settings.blur.radius)
 
-
-def equidistant_crop_filter(orientation: Orientation) -> bool:
-    return orientation in (
-        Orientation.WIDER_THAN_SCREEN,
-        Orientation.SIMILAR_ASPECT_RATIO,
-        Orientation.NARROWER_THAN_SCREEN,
+    post_process(
+        img_iter=img_iter,
+        size=settings.landscape_resolution,
+        output_dir=output_dir,
+        stem=path.stem,
     )
 
 
-def wide_image_crop_filter(orientation: Orientation) -> bool:
-    return orientation in (
-        Orientation.WIDER_THAN_THRESHOLD,
-        Orientation.NARROWER_THAN_THRESHOLD,
+def equidistant_crop_process(
+    img: Image.Image,
+    path: Path,
+    settings: Settings,
+    output_dir: Path,
+    orientation: Orientation,
+) -> None:
+    img_iter = equidistant_crop(
+        img, orientation, settings, settings.equidistant_crop.scale_factor
+    )
+
+    post_process(
+        img_iter=img_iter,
+        size=settings.landscape_resolution,
+        output_dir=output_dir,
+        stem=path.stem,
     )
 
 
-def auto(settings: Settings) -> None:
-    image_paths = get_image_paths(settings)
+def extreme_crop_process(
+    img: Image.Image,
+    path: Path,
+    settings: Settings,
+    output_dir: Path,
+    orientation: Orientation,
+) -> None:
+    img_iter = equidistant_crop(
+        img, orientation, settings, settings.extreme_crop.scale_factor
+    )
 
-    dispatch()
+    post_process(
+        img_iter=img_iter,
+        size=settings.landscape_resolution,
+        output_dir=output_dir,
+        stem=path.stem,
+    )

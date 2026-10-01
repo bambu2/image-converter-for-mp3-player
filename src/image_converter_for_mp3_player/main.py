@@ -1,17 +1,12 @@
 import logging
-from functools import partial
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, Any
 
 import typer
+from rich.progress import track
 
 from image_converter_for_mp3_player.core.config import settings
-from image_converter_for_mp3_player.services import (
-    apply_pipeline,
-    background_blur,
-    dispatcher,
-    equidistant_crop,
-)
+from image_converter_for_mp3_player.services import Mode, dispatch
 from image_converter_for_mp3_player.utils import get_image_paths
 
 logger = logging.getLogger(__name__)
@@ -50,34 +45,21 @@ def blur(
     rotatable_screen: RotatableScreen = settings.rotatable_screen,
     radius: Radius = settings.blur.radius,
 ):
-    updated_settings = settings.model_copy(
-        update={
-            "input_dir": input_dir,
-            "output_dir": output_dir,
-            "screen_resolution": screen_resolution_str,
-            "threshold": threshold,
-            "recursive": recursive,
-            "dry_run": dry_run,
-            "rotatable_screen": rotatable_screen,
-        }
-    )
-    output_dir.mkdir(parents=True, exist_ok=True)
-    image_paths = get_image_paths(updated_settings)
-    if settings.dry_run:
-        print(f"[DRY RUN] input_dir: {settings.input_dir}")
-        print(f"[DRY RUN] image_paths: {image_paths}")
-        print(f"[DRY RUN] output_dir: {output_dir}")
-    else:
-        apply_pipeline(
-            image_paths,
-            partial(background_blur, radius=radius),
-            updated_settings,
-            output_dir,
-        )
+    update: dict[str, Any] = {
+        "input_dir": input_dir,
+        "output_dir": output_dir,
+        "screen_resolution": screen_resolution_str,
+        "threshold": threshold,
+        "recursive": recursive,
+        "dry_run": dry_run,
+        "rotatable_screen": rotatable_screen,
+    }
+
+    process(update, output_dir, Mode.BLUR)
 
 
 @app.command()
-def crop(
+def eqcrop(
     input_dir: InputDir = settings.input_dir,
     output_dir: OutputDir = settings.equidistant_crop.output_dir,
     screen_resolution_str: ScreenResolutionStr = settings.landscape_resolution_str,
@@ -87,74 +69,77 @@ def crop(
     rotatable_screen: RotatableScreen = settings.rotatable_screen,
     scale_factor: ScaleFactor = settings.equidistant_crop.scale_factor,
 ):
-    updated_settings = settings.model_copy(
-        update={
-            "input_dir": input_dir,
-            "output_dir": output_dir,
-            "screen_resolution": screen_resolution_str,
-            "threshold": threshold,
-            "recursive": recursive,
-            "dry_run": dry_run,
-            "rotatable_screen": rotatable_screen,
-            "scale_factor": scale_factor,
-        }
-    )
-    output_dir.mkdir(parents=True, exist_ok=True)
-    image_paths = get_image_paths(updated_settings)
-    if settings.dry_run:
-        print(f"[DRY RUN] input_dir: {settings.input_dir}")
-        print(f"[DRY RUN] image_paths: {image_paths}")
-        print(f"[DRY RUN] output_dir: {output_dir}")
-    else:
-        apply_pipeline(
-            image_paths,
-            partial(equidistant_crop, scale_factor=scale_factor),
-            updated_settings,
-            output_dir,
-        )
+
+    update: dict[str, Any] = {
+        "input_dir": input_dir,
+        "output_dir": output_dir,
+        "screen_resolution": screen_resolution_str,
+        "threshold": threshold,
+        "recursive": recursive,
+        "dry_run": dry_run,
+        "rotatable_screen": rotatable_screen,
+        "scale_factor": scale_factor,
+    }
+    process(update, output_dir, Mode.EQUIDISTANT_CROP)
 
 
 @app.command()
-def widecrop(
+def excrop(
     input_dir: InputDir = settings.input_dir,
-    output_dir: OutputDir = settings.wide_image_crop.output_dir,
+    output_dir: OutputDir = settings.extreme_crop.output_dir,
     screen_resolution_str: ScreenResolutionStr = settings.landscape_resolution_str,
     threshold: Threshold = settings.threshold,
     recursive: Recursive = settings.recursive,
     dry_run: DryRun = settings.dry_run,
     rotatable_screen: RotatableScreen = settings.rotatable_screen,
-    scale_factor: ScaleFactor = settings.wide_image_crop.scale_factor,
+    scale_factor: ScaleFactor = settings.extreme_crop.scale_factor,
 ):
-    updated_settings = settings.model_copy(
-        update={
-            "input_dir": input_dir,
-            "output_dir": output_dir,
-            "screen_resolution": screen_resolution_str,
-            "threshold": threshold,
-            "recursive": recursive,
-            "dry_run": dry_run,
-            "rotatable_screen": rotatable_screen,
-            "scale_factor": scale_factor,
-        }
-    )
+
+    update: dict[str, Any] = {
+        "input_dir": input_dir,
+        "output_dir": output_dir,
+        "screen_resolution": screen_resolution_str,
+        "threshold": threshold,
+        "recursive": recursive,
+        "dry_run": dry_run,
+        "rotatable_screen": rotatable_screen,
+        "scale_factor": scale_factor,
+    }
+
+    process(update, output_dir, Mode.EXTREME_CROP)
+
+
+@app.command()
+def auto(): ...
+
+
+def process(
+    update: dict[str, Any], output_dir: Path, mode: Mode, **kwargs: Any
+) -> None:
     output_dir.mkdir(parents=True, exist_ok=True)
+    updated_settings = settings.model_copy(update=update)
     image_paths = get_image_paths(updated_settings)
-    if settings.dry_run:
+    if updated_settings.dry_run:
         print(f"[DRY RUN] input_dir: {settings.input_dir}")
         print(f"[DRY RUN] image_paths: {image_paths}")
         print(f"[DRY RUN] output_dir: {output_dir}")
     else:
-        apply_pipeline(
-            image_paths,
-            partial(equidistant_crop, scale_factor=scale_factor),
-            updated_settings,
-            output_dir,
-        )
+        if not image_paths:
+            logger.info("No images found.")
+            raise typer.Exit()
 
+        for path in track(image_paths, description="Processing images"):
+            try:
+                dispatch(
+                    path=path,
+                    mode=mode,
+                    settings=updated_settings,
+                    output_dir=output_dir,
+                )
 
-@app.command()
-def route():
-    dispatcher.auto(settings)
+            except OSError as e:
+                logger.error(f"Error processing: {e}")
+                raise typer.Exit(code=1)
 
 
 if __name__ == "__main__":

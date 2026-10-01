@@ -25,11 +25,11 @@ class EquidistantCropSettings(BaseSettings):
     scale_factor: PositiveFloat = 0.5
 
 
-class WideImageCropSettings(BaseSettings):
+class ExtremeCropSettings(BaseSettings):
     model_config = SettingsConfigDict(
-        toml_file="toml_file", toml_table_header=("wide-image-crop",), extra="ignore"
+        toml_file="toml_file", toml_table_header=("extreme-crop",), extra="ignore"
     )
-    output_dir: Path = Path("output") / "wide_image_crop"
+    output_dir: Path = Path("output") / "extreme_crop"
 
     scale_factor: PositiveFloat = 1.0
 
@@ -37,9 +37,9 @@ class WideImageCropSettings(BaseSettings):
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(toml_file="toml_file")
 
-    blur = BlurSettings()  # type:ignore[call-arg]
-    equidistant_crop = EquidistantCropSettings()  # type:ignore[call-arg]
-    wide_image_crop = WideImageCropSettings()  # type:ignore[call-arg]
+    blur = BlurSettings()
+    equidistant_crop = EquidistantCropSettings()
+    extreme_crop = ExtremeCropSettings()
 
     input_dir: DirectoryPath = Path("input")
 

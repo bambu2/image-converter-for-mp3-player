@@ -19,6 +19,6 @@ radius = 2.0
 output_dir = Path("output") / "equidistant_crop"
 scale-factor = 0.5
 
-[wide-image-crop]
-output-dir = Path("output") / "wide_image_crop"
+[extreme-crop]
+output_dir = Path("output") / "extreme_crop"
 scale-factor = 1.0
