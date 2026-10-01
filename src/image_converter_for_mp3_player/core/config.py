@@ -26,9 +26,9 @@ class ExtremeCropSettings(BaseSettings):
 
 
 class Settings(BaseSettings):
-    blur = BlurSettings()
-    equidistant_crop = EquidistantCropSettings()
-    extreme_crop = ExtremeCropSettings()
+    blur: BlurSettings = BlurSettings()
+    equidistant_crop: EquidistantCropSettings = EquidistantCropSettings()
+    extreme_crop: ExtremeCropSettings = ExtremeCropSettings()
 
     input_dir: DirectoryPath = Path("input")
 
