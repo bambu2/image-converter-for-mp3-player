@@ -2,41 +2,30 @@ from pathlib import Path
 from typing import Annotated
 
 from pydantic import DirectoryPath, Field, PositiveFloat, PositiveInt, model_validator
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic_settings import BaseSettings
 
 toml_file = "config.toml"
 
 
 class BlurSettings(BaseSettings):
-    model_config = SettingsConfigDict(
-        toml_file="toml_file", toml_table_header=("blur",), extra="ignore"
-    )
     output_dir: Path = Path("output") / "blur"
 
     radius: float = 2.0
 
 
 class EquidistantCropSettings(BaseSettings):
-    model_config = SettingsConfigDict(
-        toml_file="toml_file", toml_table_header=("equidistant-crop",), extra="ignore"
-    )
     output_dir: Path = Path("output") / "equidistant_crop"
 
     scale_factor: PositiveFloat = 0.5
 
 
 class ExtremeCropSettings(BaseSettings):
-    model_config = SettingsConfigDict(
-        toml_file="toml_file", toml_table_header=("extreme-crop",), extra="ignore"
-    )
     output_dir: Path = Path("output") / "extreme_crop"
 
     scale_factor: PositiveFloat = 1.0
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(toml_file="toml_file")
-
     blur = BlurSettings()
     equidistant_crop = EquidistantCropSettings()
     extreme_crop = ExtremeCropSettings()
