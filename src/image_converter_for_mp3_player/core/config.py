@@ -4,35 +4,39 @@ from typing import Annotated
 from pydantic import DirectoryPath, Field, PositiveFloat, PositiveInt, model_validator
 from pydantic_settings import BaseSettings
 
-toml_file = "config.toml"
-
 
 class BlurSettings(BaseSettings):
-    output_dir: Path = Path("output") / "blur"
+    sub_dir: Path = Path("blur")
 
     radius: float = 2.0
 
 
 class EquidistantCropSettings(BaseSettings):
-    output_dir: Path = Path("output") / "equidistant_crop"
+    sub_dir: Path = Path("equidistant_crop")
 
     scale_factor: PositiveFloat = 0.5
 
 
 class ExtremeCropSettings(BaseSettings):
-    output_dir: Path = Path("output") / "extreme_crop"
+    sub_dir: Path = Path("extreme_crop")
 
     scale_factor: PositiveFloat = 1.0
+
+
+class AutoSettings(BaseSettings):
+    sub_dir: Path = Path("auto")
 
 
 class Settings(BaseSettings):
     blur: BlurSettings = BlurSettings()
     equidistant_crop: EquidistantCropSettings = EquidistantCropSettings()
     extreme_crop: ExtremeCropSettings = ExtremeCropSettings()
+    auto: AutoSettings = AutoSettings()
 
     input_dir: DirectoryPath = Path("input")
+    output_dir: Path = Path("output")
 
-    landscape_resolution_str: str = "320x240"
+    landscape_res_str: str = "320x240"
 
     landscape_width: PositiveInt = 1
     landscape_height: PositiveInt = 1
@@ -55,8 +59,8 @@ class Settings(BaseSettings):
 
     @model_validator(mode="after")
     def _derive_screen_fields(self):
-        self.landscape_width = int(self.landscape_resolution_str.split("x")[0])
-        self.landscape_height = int(self.landscape_resolution_str.split("x")[1])
+        self.landscape_width = int(self.landscape_res_str.split("x")[0])
+        self.landscape_height = int(self.landscape_res_str.split("x")[1])
         self.landscape_resolution = (self.landscape_width, self.landscape_height)
 
         self.portrait_width = self.landscape_height

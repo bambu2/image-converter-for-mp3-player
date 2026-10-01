@@ -19,3 +19,10 @@ def _filter_image(dir: Path, recursive: bool, img_exts: frozenset[str]) -> list[
         return [p for p in dir.rglob("*") if p.suffix.lower() in img_exts]
     else:
         return [p for p in dir.glob("*") if p.suffix.lower() in img_exts]
+
+
+def target_dir(input_dir: Path, output_dir: Path, path: Path) -> Path:
+    rel_parent = path.parent.relative_to(input_dir)
+    out = output_dir / rel_parent
+    out.mkdir(parents=True, exist_ok=True)
+    return out

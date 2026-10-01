@@ -19,7 +19,8 @@ app = typer.Typer()
 
 InputDir = Annotated[Path, typer.Option("--input-dir", "-i", help="input directory")]
 OutputDir = Annotated[Path, typer.Option("--output-dir", "-o", help="output directory")]
-ScreenResolutionStr = Annotated[str, typer.Option(help="screen resolution")]
+SubDir = Annotated[Path, typer.Option("--subdir", "-s", help="subdirectory for output")]
+LandscapeResStr = Annotated[str, typer.Option(help="screen resolution")]
 Threshold = Annotated[float, typer.Option(help="threshold")]
 Recursive = Annotated[
     bool, typer.Option("--recursive", "-r", help="whether to process subdirectories")
@@ -37,86 +38,164 @@ ScaleFactor = Annotated[float, typer.Option(help="the scale factor of crop size"
 @app.command()
 def blur(
     input_dir: InputDir = settings.input_dir,
-    output_dir: OutputDir = settings.blur.output_dir,
-    screen_resolution_str: ScreenResolutionStr = settings.landscape_resolution_str,
+    output_dir: OutputDir = settings.output_dir,
+    landscape_res_str: LandscapeResStr = settings.landscape_res_str,
     threshold: Threshold = settings.threshold,
     recursive: Recursive = settings.recursive,
     dry_run: DryRun = settings.dry_run,
     rotatable_screen: RotatableScreen = settings.rotatable_screen,
+    sub_dir: SubDir = settings.blur.sub_dir,
     radius: Radius = settings.blur.radius,
 ):
-    update: dict[str, Any] = {
-        "input_dir": input_dir,
-        "output_dir": output_dir,
-        "screen_resolution": screen_resolution_str,
-        "threshold": threshold,
-        "recursive": recursive,
-        "dry_run": dry_run,
-        "rotatable_screen": rotatable_screen,
-    }
+    new_blur = settings.blur.model_copy(update={"sub_dir": sub_dir, "radius": radius})
 
-    process(update, output_dir, Mode.BLUR)
+    settings_update = get_settings_update(
+        input_dir,
+        output_dir,
+        landscape_res_str,
+        threshold,
+        recursive,
+        dry_run,
+        rotatable_screen,
+    )
+
+    update = settings_update | {"blur": new_blur}
+
+    process(update, sub_dir, Mode.BLUR)
 
 
 @app.command()
 def equidistant_crop(
     input_dir: InputDir = settings.input_dir,
-    output_dir: OutputDir = settings.equidistant_crop.output_dir,
-    screen_resolution_str: ScreenResolutionStr = settings.landscape_resolution_str,
+    output_dir: OutputDir = settings.output_dir,
+    landscape_res_str: LandscapeResStr = settings.landscape_res_str,
     threshold: Threshold = settings.threshold,
     recursive: Recursive = settings.recursive,
     dry_run: DryRun = settings.dry_run,
     rotatable_screen: RotatableScreen = settings.rotatable_screen,
+    sub_dir: SubDir = settings.equidistant_crop.sub_dir,
     scale_factor: ScaleFactor = settings.equidistant_crop.scale_factor,
 ):
 
-    update: dict[str, Any] = {
-        "input_dir": input_dir,
-        "output_dir": output_dir,
-        "screen_resolution": screen_resolution_str,
-        "threshold": threshold,
-        "recursive": recursive,
-        "dry_run": dry_run,
-        "rotatable_screen": rotatable_screen,
-        "scale_factor": scale_factor,
-    }
+    new_equidistant_crop = settings.equidistant_crop.model_copy(
+        update={"sub_dir": sub_dir, "scale_factor": scale_factor}
+    )
+
+    settings_update = get_settings_update(
+        input_dir,
+        output_dir,
+        landscape_res_str,
+        threshold,
+        recursive,
+        dry_run,
+        rotatable_screen,
+    )
+
+    update = settings_update | {"equidistant_crop": new_equidistant_crop}
+
     process(update, output_dir, Mode.EQUIDISTANT_CROP)
 
 
 @app.command()
 def extreme_crop(
     input_dir: InputDir = settings.input_dir,
-    output_dir: OutputDir = settings.extreme_crop.output_dir,
-    screen_resolution_str: ScreenResolutionStr = settings.landscape_resolution_str,
+    output_dir: OutputDir = settings.extreme_crop.sub_dir,
+    landscape_res_str: LandscapeResStr = settings.landscape_res_str,
     threshold: Threshold = settings.threshold,
     recursive: Recursive = settings.recursive,
     dry_run: DryRun = settings.dry_run,
     rotatable_screen: RotatableScreen = settings.rotatable_screen,
+    sub_dir: SubDir = settings.extreme_crop.sub_dir,
     scale_factor: ScaleFactor = settings.extreme_crop.scale_factor,
 ):
 
-    update: dict[str, Any] = {
-        "input_dir": input_dir,
-        "output_dir": output_dir,
-        "screen_resolution": screen_resolution_str,
-        "threshold": threshold,
-        "recursive": recursive,
-        "dry_run": dry_run,
-        "rotatable_screen": rotatable_screen,
-        "scale_factor": scale_factor,
-    }
+    new_extreme_crop = settings.extreme_crop.model_copy(
+        update={"sub_dir": sub_dir, "scale_factor": scale_factor}
+    )
+
+    settings_update = get_settings_update(
+        input_dir,
+        output_dir,
+        landscape_res_str,
+        threshold,
+        recursive,
+        dry_run,
+        rotatable_screen,
+    )
+
+    update = settings_update | {"extreme_crop": new_extreme_crop}
 
     process(update, output_dir, Mode.EXTREME_CROP)
 
 
 @app.command()
-def auto(): ...
+def auto(
+    input_dir: InputDir = settings.input_dir,
+    output_dir: OutputDir = settings.output_dir,
+    sub_dir: SubDir = settings.auto.sub_dir,
+    landscape_res_str: LandscapeResStr = settings.landscape_res_str,
+    threshold: Threshold = settings.threshold,
+    recursive: Recursive = settings.recursive,
+    dry_run: DryRun = settings.dry_run,
+    rotatable_screen: RotatableScreen = settings.rotatable_screen,
+    radius: Radius = settings.blur.radius,
+    equidistant_scale_factor: ScaleFactor = settings.equidistant_crop.scale_factor,
+    extreme_scale_factor: ScaleFactor = settings.extreme_crop.scale_factor,
+):
+    # Create updated settings for each mode
+    new_blur = settings.blur.model_copy(update={"sub_dir": sub_dir, "radius": radius})
+    new_equidistant_crop = settings.equidistant_crop.model_copy(
+        update={"sub_dir": sub_dir, "scale_factor": equidistant_scale_factor}
+    )
+    new_extreme_crop = settings.extreme_crop.model_copy(
+        update={"sub_dir": sub_dir, "scale_factor": extreme_scale_factor}
+    )
+    new_auto = settings.auto.model_copy(update={"sub_dir": sub_dir})
+
+    settings_update = get_settings_update(
+        input_dir,
+        output_dir,
+        landscape_res_str,
+        threshold,
+        recursive,
+        dry_run,
+        rotatable_screen,
+    )
+
+    update = (
+        settings_update
+        | {"blur": new_blur}
+        | {"equidistant_crop": new_equidistant_crop}
+        | {"extreme_crop": new_extreme_crop}
+        | {"auto": new_auto}
+    )
+
+    process(update, output_dir, Mode.AUTO)
+
+
+def get_settings_update(
+    input_dir: InputDir,
+    output_dir: OutputDir,
+    landscape_res_str: LandscapeResStr,
+    threshold: Threshold,
+    recursive: Recursive,
+    dry_run: DryRun,
+    rotatable_screen: RotatableScreen,
+) -> dict[str, Any]:
+    return {
+        "input_dir": input_dir,
+        "output_dir": output_dir,
+        "landscape_res_str": landscape_res_str,
+        "threshold": threshold,
+        "recursive": recursive,
+        "dry_run": dry_run,
+        "rotatable_screen": rotatable_screen,
+    }
 
 
 def process(
     update: dict[str, Any], output_dir: Path, mode: Mode, **kwargs: Any
 ) -> None:
-    output_dir.mkdir(parents=True, exist_ok=True)
     updated_settings = settings.model_copy(update=update)
     image_paths = get_image_paths(updated_settings)
     if updated_settings.dry_run:
@@ -134,7 +213,6 @@ def process(
                     path=path,
                     mode=mode,
                     settings=updated_settings,
-                    output_dir=output_dir,
                 )
 
             except OSError as e:

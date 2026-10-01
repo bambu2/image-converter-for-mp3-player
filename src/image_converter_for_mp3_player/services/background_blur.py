@@ -7,12 +7,13 @@ from image_converter_for_mp3_player.utils import Orientation
 
 
 def background_blur(
-    img: Image.Image, ori: Orientation, settings: Settings, radius: float
+    img: Image.Image, orientation: Orientation, settings: Settings, radius: float
 ) -> Iterable[Image.Image]:
     if settings.rotatable_screen:
         target_resolution = (
             settings.landscape_resolution
-            if ori in (Orientation.WIDER_THAN_SCREEN, Orientation.WIDER_THAN_THRESHOLD)
+            if orientation
+            in (Orientation.WIDER_THAN_SCREEN, Orientation.WIDER_THAN_THRESHOLD)
             else settings.portrait_resolution
         )
     else:

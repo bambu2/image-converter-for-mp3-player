@@ -7,22 +7,25 @@ from image_converter_for_mp3_player.utils import Orientation
 
 
 def equidistant_crop(
-    img: Image.Image, ori: Orientation, settings: Settings, scale_factor: float
+    img: Image.Image, orientation: Orientation, settings: Settings, scale_factor: float
 ) -> Iterable[Image.Image]:
     img_size = img.size
 
-    crop_size = _get_crop_size(img_size, ori, settings, scale_factor)
+    crop_size = _get_crop_size(img_size, orientation, settings, scale_factor)
     crop_boxes = _get_crop_boxes(img_size, crop_size)
     for box in crop_boxes:
         yield img.crop(box)
 
 
 def _get_crop_size(
-    img_size: tuple[int, int], ori: Orientation, settings: Settings, scale_factor: float
+    img_size: tuple[int, int],
+    orientation: Orientation,
+    settings: Settings,
+    scale_factor: float,
 ) -> tuple[int, int]:
     img_width, img_height = img_size
 
-    if ori == Orientation.WIDER_THAN_SCREEN or ori == Orientation.WIDER_THAN_THRESHOLD:
+    if orientation in (Orientation.WIDER_THAN_SCREEN, Orientation.WIDER_THAN_THRESHOLD):
         crop_width = img_width * scale_factor
 
         crop_height = crop_width / settings.landscape_width * settings.landscape_height
@@ -45,11 +48,11 @@ def _get_crop_size(
     return (int(crop_width), int(crop_height))
 
 
-def _axis_starts(img_size: int, crop_size: int, devision: int) -> list[int]:
-    if devision == 1 or crop_size >= img_size:
+def _axis_starts(img_size: int, crop_size: int, part: int) -> list[int]:
+    if part == 1 or crop_size >= img_size:
         return [0]
-    step = (img_size - crop_size) // (devision - 1)
-    return [min(i * step, img_size - crop_size) for i in range(devision)]
+    step = (img_size - crop_size) // (part - 1)
+    return [min(i * step, img_size - crop_size) for i in range(part)]
 
 
 def _get_crop_boxes(
@@ -59,9 +62,9 @@ def _get_crop_boxes(
     crop_width, crop_height = crop_size
 
     if img_width <= 0 or img_height <= 0:
-        raise ValueError(f"图像尺寸必须为正: {img_width}x{img_height}")
+        raise ValueError(f"img_size must be positive: {img_width}x{img_height}")
     if crop_width <= 0 or crop_height <= 0:
-        raise ValueError(f"裁剪尺寸必须为正: {crop_width}x{crop_height}")
+        raise ValueError(f"crop_size must be positive: {crop_width}x{crop_height}")
 
     col = -(-img_width // crop_width)
     row = -(-img_height // crop_height)
