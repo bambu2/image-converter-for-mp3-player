@@ -138,17 +138,28 @@ def auto(
     recursive: Recursive = settings.recursive,
     dry_run: DryRun = settings.dry_run,
     rotatable_screen: RotatableScreen = settings.rotatable_screen,
+    blur_sub_dir: SubDir = settings.blur.sub_dir,
+    equidistant_sub_dir: SubDir = settings.equidistant_crop.sub_dir,
+    extreme_sub_dir: SubDir = settings.extreme_crop.sub_dir,
     radius: Radius = settings.blur.radius,
     equidistant_scale_factor: ScaleFactor = settings.equidistant_crop.scale_factor,
     extreme_scale_factor: ScaleFactor = settings.extreme_crop.scale_factor,
 ):
     # Create updated settings for each mode
-    new_blur = settings.blur.model_copy(update={"sub_dir": sub_dir, "radius": radius})
+    new_blur = settings.blur.model_copy(
+        update={"sub_dir": sub_dir / blur_sub_dir, "radius": radius}
+    )
     new_equidistant_crop = settings.equidistant_crop.model_copy(
-        update={"sub_dir": sub_dir, "scale_factor": equidistant_scale_factor}
+        update={
+            "sub_dir": sub_dir / equidistant_sub_dir,
+            "scale_factor": equidistant_scale_factor,
+        }
     )
     new_extreme_crop = settings.extreme_crop.model_copy(
-        update={"sub_dir": sub_dir, "scale_factor": extreme_scale_factor}
+        update={
+            "sub_dir": sub_dir / extreme_sub_dir,
+            "scale_factor": extreme_scale_factor,
+        }
     )
     new_auto = settings.auto.model_copy(update={"sub_dir": sub_dir})
 
