@@ -47,6 +47,8 @@ def blur(
     sub_dir: SubDir = settings.blur.sub_dir,
     radius: Radius = settings.blur.radius,
 ):
+    """apply GaussianBlur to images"""
+
     new_blur = settings.blur.model_copy(update={"sub_dir": sub_dir, "radius": radius})
 
     settings_update = get_settings_update(
@@ -76,6 +78,7 @@ def equidistant_crop(
     sub_dir: SubDir = settings.equidistant_crop.sub_dir,
     scale_factor: ScaleFactor = settings.equidistant_crop.scale_factor,
 ):
+    """equidistant crop images"""
 
     new_equidistant_crop = settings.equidistant_crop.model_copy(
         update={"sub_dir": sub_dir, "scale_factor": scale_factor}
@@ -108,6 +111,7 @@ def extreme_crop(
     sub_dir: SubDir = settings.extreme_crop.sub_dir,
     scale_factor: ScaleFactor = settings.extreme_crop.scale_factor,
 ):
+    """equidistant crop images for extreme aspect ratio images"""
 
     new_extreme_crop = settings.extreme_crop.model_copy(
         update={"sub_dir": sub_dir, "scale_factor": scale_factor}
