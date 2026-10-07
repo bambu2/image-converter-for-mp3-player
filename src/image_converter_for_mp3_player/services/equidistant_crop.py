@@ -26,18 +26,18 @@ def _get_crop_size(
     img_width, img_height = img_size
 
     if orientation in (Orientation.WIDER_THAN_SCREEN, Orientation.WIDER_THAN_THRESHOLD):
-        crop_width = img_width * scale_factor
-
-        crop_height = crop_width / settings.landscape_width * settings.landscape_height
-    else:
         crop_height = img_height * scale_factor
+
+        crop_width = crop_height / settings.landscape_height * settings.landscape_width
+    else:
+        crop_width = img_width * scale_factor
         if settings.rotatable_screen:
-            crop_width = (
-                crop_height / settings.portrait_height * settings.portrait_width
+            crop_height = (
+                crop_width / settings.portrait_width * settings.portrait_height
             )
         else:
-            crop_width = (
-                crop_height / settings.landscape_height * settings.landscape_width
+            crop_height = (
+                crop_width / settings.landscape_width * settings.landscape_height
             )
 
     if crop_width < 1:

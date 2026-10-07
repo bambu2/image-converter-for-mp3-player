@@ -30,35 +30,45 @@ def dispatch(path: Path, settings: Settings, mode: Mode) -> None:
         )
         match mode:
             case Mode.BLUR:
-                blur_process(img, path, settings, orientation)
+                blur_process(img, settings.output_dir, path, settings, orientation)
 
             case Mode.EQUIDISTANT_CROP:
-                equidistant_crop_process(img, path, settings, orientation)
+                equidistant_crop_process(
+                    img, settings.output_dir, path, settings, orientation
+                )
 
             case Mode.EXTREME_CROP:
-                extreme_crop_process(img, path, settings, orientation)
+                extreme_crop_process(
+                    img, settings.output_dir, path, settings, orientation
+                )
 
             case Mode.AUTO:
+                auto_output_dir = settings.output_dir / settings.auto.sub_dir
                 if orientation in (
                     Orientation.WIDER_THAN_SCREEN,
                     Orientation.SIMILAR_ASPECT_RATIO,
                     Orientation.NARROWER_THAN_SCREEN,
                 ):
-                    blur_process(img, path, settings, orientation)
-                    equidistant_crop_process(img, path, settings, orientation)
+                    blur_process(img, auto_output_dir, path, settings, orientation)
+                    equidistant_crop_process(
+                        img, auto_output_dir, path, settings, orientation
+                    )
                 else:
-                    extreme_crop_process(img, path, settings, orientation)
+                    extreme_crop_process(
+                        img, auto_output_dir, path, settings, orientation
+                    )
 
 
 def blur_process(
     img: Image.Image,
+    output_root: Path,
     path: Path,
     settings: Settings,
     orientation: Orientation,
 ) -> None:
     output_dir = target_dir(
         input_dir=settings.input_dir,
-        output_dir=settings.output_dir / settings.blur.sub_dir,
+        output_dir=output_root / settings.blur.sub_dir,
         path=path,
     )
     img_iter = background_blur(img, orientation, settings, settings.blur.radius)
@@ -74,13 +84,14 @@ def blur_process(
 
 def equidistant_crop_process(
     img: Image.Image,
+    output_root: Path,
     path: Path,
     settings: Settings,
     orientation: Orientation,
 ) -> None:
     output_dir = target_dir(
         input_dir=settings.input_dir,
-        output_dir=settings.output_dir / settings.equidistant_crop.sub_dir,
+        output_dir=output_root / settings.equidistant_crop.sub_dir,
         path=path,
     )
     img_iter = equidistant_crop(
@@ -98,13 +109,14 @@ def equidistant_crop_process(
 
 def extreme_crop_process(
     img: Image.Image,
+    output_root: Path,
     path: Path,
     settings: Settings,
     orientation: Orientation,
 ) -> None:
     output_dir = target_dir(
         input_dir=settings.input_dir,
-        output_dir=settings.output_dir / settings.extreme_crop.sub_dir,
+        output_dir=output_root / settings.extreme_crop.sub_dir,
         path=path,
     )
     img_iter = equidistant_crop(
